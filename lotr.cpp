@@ -90,6 +90,12 @@ class Humano: public Soldado{
             // if(minuano == 2) throw incorrect_amount_error("There can only be one brazilian");
         }
         
+        enum class ATOMIC_MODE{
+            NORMAL, // lot of dmg to all enemies
+            RECOVERY, // heal allies
+            SWORD, // probably instakill in 1 enemy
+            UTSUSEMI // massive dmg for 9 enemies
+        };
 
         void I_AM_ATOMIC(){
             cout << "\x1B[3m\x1B[1mPlaytime is over\x1B[0m" << endl;

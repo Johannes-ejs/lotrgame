@@ -90,6 +90,24 @@ class Humano: public Soldado{
             // if(minuano == 2) throw incorrect_amount_error("There can only be one brazilian");
         }
         
+
+        void I_AM_ATOMIC(){
+            cout << "\x1B[3m\x1B[1mPlaytime is over\x1B[0m" << endl;
+            this_thread::sleep_for(chrono::seconds(1));
+            cout << "The area is filled with a bluish magic" << endl;
+            this_thread::sleep_for(chrono::milliseconds(1500));
+            cout << "Allies and foes alike all stopped battling, and silently, fearfully stared at the source of the great magic" << endl;
+            this_thread::sleep_for(chrono::milliseconds(2500));
+            cout << "Let the true meaning of almighty be carved in your soul..." << endl;
+            this_thread::sleep_for(chrono::milliseconds(1500));
+            cout << "I..." << endl;
+            this_thread::sleep_for(chrono::milliseconds(1500));
+            cout << "\x1B[1mAM...\x1B[0m" << endl;
+            this_thread::sleep_for(chrono::seconds(2));
+            cout << "\x1B[3matomic\x1B[0m" << endl;
+            // this_thread::sleep_for(chrono::seconds(2));
+            // cout << "A great explosion takes place" << endl;
+        }
         Humano(const Humano& other)= delete;
         
         void ataque(Soldado* other) override {
@@ -100,12 +118,6 @@ class Humano: public Soldado{
 
         // Special treatment to humans called Samuel Rodrigues, Vergil, Talion and Cid Kagenou
         // Special attacks: JCE (I NEED MORE POWER, THIS IS POWER), I AM ATOMIC
-
-        void I_AM_ATOMIC(){
-            cout << "\x1B[3mPlaytime is over\x1B[0m" << endl;
-            this_thread::sleep_for(chrono::seconds(1));
-            cout << "The area is filled with a bluish magic" << endl;
-        }
 };
 
 class Gondoriano: public Humano {
@@ -285,6 +297,23 @@ class Menu{
 int main(){ 
     srand(time(NULL));
     Menu game;
+    Humano* cid = new Humano("Cid Kagenou", 10, 10);
+
+    
+    
+    // proof of concept: printing and erasing characters
+    // cout.sync_with_stdio(false);
+    // for(int i = 0; i < 10; i++){
+    //     cout << i << flush;
+    //     this_thread::sleep_for(chrono::milliseconds(50));
+    //     cout << "\b" << flush;
+    // }
+    // cout.sync_with_stdio(true);
+    
+    
+    
+    
+    // cid->I_AM_ATOMIC();
     // cout << "\x1B[3m\x1B[1mPlaytime is over\x1B[0m" << endl;
     // do{
     // game.instantiate();

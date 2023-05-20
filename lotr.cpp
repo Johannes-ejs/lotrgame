@@ -8,10 +8,10 @@
 using namespace std;
 
 class incorrect_amount_error : public exception{
-    string message;
+    const char *message;
     public:
-        incorrect_amount_error(const char* message): exception(), message(message) {}
-        const char* what(){ return message.c_str(); }
+        incorrect_amount_error(const char* message): message(message) {}
+        const char* what() const noexcept override{ return  message;}
 };
 
 
@@ -101,9 +101,9 @@ class Humano: public Soldado{
             cout << "Let the true meaning of almighty be carved in your soul..." << endl;
             this_thread::sleep_for(chrono::milliseconds(1500));
             cout << "I..." << endl;
-            this_thread::sleep_for(chrono::milliseconds(1500));
+            this_thread::sleep_for(chrono::milliseconds(1000));
             cout << "\x1B[1mAM...\x1B[0m" << endl;
-            this_thread::sleep_for(chrono::seconds(2));
+            this_thread::sleep_for(chrono::milliseconds(1500));
             cout << "\x1B[3matomic\x1B[0m" << endl;
             // this_thread::sleep_for(chrono::seconds(2));
             // cout << "A great explosion takes place" << endl;
@@ -116,8 +116,8 @@ class Humano: public Soldado{
             if(!(rand()%10)) other->defesa(this->get_poder_ataque());
         }
 
-        // Special treatment to humans called Samuel Rodrigues, Vergil, Talion and Cid Kagenou
-        // Special attacks: JCE (I NEED MORE POWER, THIS IS POWER), I AM ATOMIC
+        // Special treatment to human called Cid Kagenou
+        // Special attacks: Battle Mode (Playtime is over), I AM ATOMIC, 
 };
 
 class Gondoriano: public Humano {
@@ -171,7 +171,7 @@ class Balrog: public Soldado{
     }
 
     void berserk(){
-        cout << "The air is getting warmer around " << get_nome() << endl;
+        cout << "\x1B[3mThe air is getting warmer around " << get_nome() << "\x1B[0m" << endl;
     }
 
     void ataque(Soldado* other) override{
@@ -186,16 +186,16 @@ class Balrog: public Soldado{
 
 class Sauron: public Soldado{
 
-    static size_t counter;
 
     public:
+    static size_t count;
         Sauron(int hp, int pa) : Soldado("Sauron", 10 * hp, pa){
-            if(counter) throw runtime_error("There can only be one Dark Lord");
-            counter++;
+            count++;
+            if(count == 2) throw incorrect_amount_error("There can only be one Dark Lord");
         }
         Sauron(const Sauron &other) = delete;
         
-        ~Sauron(){counter--;}
+        ~Sauron(){count--;}
         
         void ataque(Soldado *other) {
             if(get_saude()<=0) return;
@@ -270,6 +270,8 @@ class Menu{
 
     bool game_over;
 
+    int gameplay_style; // sets the side the player is controlling (if he is playing)
+
     Vector sauron_army;
     Vector elf_army;
 
@@ -294,27 +296,29 @@ class Menu{
 };
 
 
+size_t Sauron::count = 0;
+
 int main(){ 
     srand(time(NULL));
     Menu game;
-    Humano* cid = new Humano("Cid Kagenou", 10, 10);
-
+    // Humano* cid = new Humano("Cid Kagenou", 10, 10);
+    Sauron s1(10,10);
+    Sauron s2(10,10);
     
     
     // proof of concept: printing and erasing characters
     // cout.sync_with_stdio(false);
     // for(int i = 0; i < 10; i++){
     //     cout << i << flush;
-    //     this_thread::sleep_for(chrono::milliseconds(50));
+    //     this_thread::sleep_for(chrono::milliseconds(100));
     //     cout << "\b" << flush;
     // }
     // cout.sync_with_stdio(true);
     
     
     
-    
     // cid->I_AM_ATOMIC();
-    // cout << "\x1B[3m\x1B[1mPlaytime is over\x1B[0m" << endl;
+    
     // do{
     // game.instantiate();
     // game.run();

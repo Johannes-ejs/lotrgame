@@ -1,7 +1,18 @@
 #include <iostream>
 #include <ctime>
+#include <thread>
+#include <chrono>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
+
+class incorrect_amount_error : public exception{
+    string message;
+    public:
+        incorrect_amount_error(const char* message): exception(), message(message) {}
+        const char* what(){ return message.c_str(); }
+};
 
 
 class Soldado{
@@ -33,46 +44,147 @@ class Soldado{
 
 class Elfo: public Soldado{
     public:
+        
         Elfo(string nome, int hp, int pa): Soldado(nome, hp, pa+1) {}
+        
         Elfo(const Elfo& other)= delete;
+        
         void ataque(Soldado* other) override { if(get_saude() > 0)other->defesa(this->get_poder_ataque()); }
+        
+        void long_range(){}
+        
+        void special(){}
 
 };
 
 class Anao: public Soldado{
     public:
+        
         Anao(string nome, int hp, int pa) : Soldado(nome, hp, pa + 20) {}
+        
         Anao(const Anao& other)= delete;
+        
         void ataque(Soldado* other) override {
             if (get_saude() > 0) return; 
             if (!(rand() % 5 <= 1))
             other->defesa(this->get_poder_ataque());
         }
+
+        void rage_beneath_the_mountains(){}
 };
 
 class Humano: public Soldado{
+
+    static size_t cid;
+    static size_t vergil;
+    static size_t talion;
+    static size_t minuano;
+    
+    int stamina; // will be used for special attacks
+    
     public:
-        Humano(string nome, int hp, int pa) : Soldado(nome, hp, pa) {}
+        Humano(string nome, int hp, int pa) : Soldado(nome, hp, pa) {
+            // if(cid == 2) throw incorrect_amount_error("There can only be one Eminence in Shadows");
+            // if(vergil == 2) throw incorrect_amount_error("There can only be one ");
+            // if(talion == 2) throw incorrect_amount_error("There can only be one undying one");
+            // if(minuano == 2) throw incorrect_amount_error("There can only be one brazilian");
+        }
+        
         Humano(const Humano& other)= delete;
+        
         void ataque(Soldado* other) override {
             if(get_saude()<=0) return;
             other->defesa(this->get_poder_ataque()); 
             if(!(rand()%10)) other->defesa(this->get_poder_ataque());
         }
+
+        // Special treatment to humans called Samuel Rodrigues, Vergil, Talion and Cid Kagenou
+        // Special attacks: JCE (I NEED MORE POWER, THIS IS POWER), I AM ATOMIC
+
+        void I_AM_ATOMIC(){
+            cout << "\x1B[3mPlaytime is over\x1B[0m" << endl;
+            this_thread::sleep_for(chrono::seconds(1));
+            cout << "The area is filled with a bluish magic" << endl;
+        }
 };
 
 class Gondoriano: public Humano {
+    size_t is_berserk;
+
+    Gondoriano(string nome, int hp, int pa) : Humano(nome, hp, pa), is_berserk() {}
+
     void defesa(int pa) override {
         set_saude(get_saude()-pa/2);
     } 
+
+    void berserk(){
+        cout << get_nome() << "'s blood is boiling..." << endl;
+        set_poder_ataque(2*get_poder_ataque());
+    }
+
+    void letargy(){
+
+    }
+
+    void normal(){
+
+    }
+
+    void ataque(Soldado* other) override{
+        if(!is_berserk && rand()%100 == 0){
+            is_berserk = 3;
+            berserk();
+        }
+
+        Humano::ataque(other);
+
+        
+    }
 };
 
 
+class Balrog: public Soldado{
+    
+    static size_t count;
+
+    // Balrog(){
+    //     if(count == 7) throw runtime_error("No more than 7 Balrogs survived the War of Wrath");
+    //     count++;
+    // }
+
+    // ~Balrog(){}
+
+    void defesa(int pa) override{
+        if(rand()%10) Soldado::defesa(pa);
+    }
+
+    void berserk(){
+        cout << "The air is getting warmer around " << get_nome() << endl;
+    }
+
+    void ataque(Soldado* other) override{
+
+    }
+
+    void long_range_attack(){
+
+    }
+
+};
+
 class Sauron: public Soldado{
 
+    static size_t counter;
+
     public:
-        Sauron(int hp, int pa) : Soldado("Sauron", 10 * hp, pa){}
+        Sauron(int hp, int pa) : Soldado("Sauron", 10 * hp, pa){
+            if(counter) throw runtime_error("There can only be one Dark Lord");
+            counter++;
+        }
         Sauron(const Sauron &other) = delete;
+        
+        ~Sauron(){counter--;}
+        
         void ataque(Soldado *other) {
             if(get_saude()<=0) return;
             if(rand() % 10 <=2){
@@ -80,6 +192,7 @@ class Sauron: public Soldado{
                 other->defesa(2 * this->get_poder_ataque());
             } else other->defesa(this->get_poder_ataque());
         }
+
 };
 
 class Orc: public Soldado{
@@ -101,7 +214,11 @@ class ReiBruxo{
 
 
 class Mago: public Soldado{
+    
     bool revived;
+    
+    int mana; // will be used for special attacks
+
     public:
         Mago(string nome, int pa, int hp) : Soldado(nome, hp, pa), revived(false) {}
         Mago(const Mago& other)= delete;
@@ -123,77 +240,55 @@ class Mago: public Soldado{
                 other->defesa(this->get_poder_ataque());
         }
 
+        void avada_kedavra(){}
+
+        void armiger_verum_rex(){}
+
+        
+
         void has_revived(){
             if(revived) cout << "The mage has revived" << endl;
             else cout << "The mage has not revived" << endl;
         }
 };
 
+class Vector: public vector<Soldado>{};
+
+class Menu{
+
+    bool game_over;
+
+    Vector sauron_army;
+    Vector elf_army;
+
+    public:
+
+        Menu(){
+
+        }
+
+        Menu(const Menu& other) = delete;
+
+        void run(){
+
+        }
+
+        void instantiate(){
+
+        }
+
+        bool over(){ return game_over;}
+
+};
 
 
 int main(){ 
     srand(time(NULL));
-    Soldado* sauron = new Sauron(10, 10);
+    Menu game;
+    // cout << "\x1B[3m\x1B[1mPlaytime is over\x1B[0m" << endl;
+    // do{
+    // game.instantiate();
+    // game.run();
+    // } while(!game.over());
     
-    Soldado* galadriel = new Elfo("Galadriel", 10, 10);
-    Soldado* celebrimbor = new Elfo("Celebrimbor", 10, 10);
-    Soldado* a = new Elfo("A", 10, 10);
-    Soldado* b = new Elfo("B", 10, 10);
-    Soldado* c = new Elfo("C", 10, 10);
-    
-    Soldado* talion = new Humano("Talion", 10, 10);
-    Soldado* talion2 = new Humano("Talion2", 10, 10);
-    Soldado* talion3 = new Humano("Talion3", 10, 10);
-    Soldado* talion4 = new Humano("Talion4", 10, 10);
-    Soldado* talion5 = new Humano("Talion5", 10, 10);
-
-    Soldado* anao1 = new Anao("Anao1", 10, 10);
-    Soldado* anao2 = new Anao("Anao2", 10, 10);
-    Soldado* anao3 = new Anao("Anao3", 10, 10);
-    Soldado* anao4 = new Anao("Anao4", 10, 10);
-    Soldado* anao5 = new Anao("Anao5", 10, 10);
-
-    Soldado* orc1 = new Orc("Orc1", 10, 10);
-    Soldado* orc2 = new Orc("Orc2", 10, 10);
-    Soldado* orc3 = new Orc("Orc3", 10, 10);
-    Soldado* orc4 = new Orc("Orc4", 10, 10);
-    Soldado* orc5 = new Orc("Orc5", 10, 10);
-    Soldado* orc6 = new Orc("Orc6", 10, 10);
-    Soldado* orc7 = new Orc("Orc7", 10, 10);
-    Soldado* orc8 = new Orc("Orc8", 10, 10);
-    Soldado* orc9 = new Orc("Orc9", 10, 10);
-    Soldado* orc10 = new Orc("Orc10", 10, 10);
-
-    Mago* gandalf = new Mago("Gandalf", 10, 10);
-
-    gandalf->ataque(orc1);
-    sauron->ataque(galadriel);
-    gandalf->ataque(orc2);
-    talion->ataque(orc3);
-    talion2->ataque(orc4);
-    anao2->ataque(orc5);
-    anao1->ataque(orc6);
-    gandalf->ataque(orc7);
-    talion->ataque(orc3);
-    gandalf->ataque(orc4);
-    celebrimbor->ataque(orc1);
-    celebrimbor->ataque(orc7);
-    gandalf->ataque(sauron);
-    talion4->ataque(orc10);
-    talion5->ataque(sauron);
-    talion->ataque(orc10);
-    talion->ataque(orc10);
-    talion->ataque(orc10);
-    talion->ataque(orc10);
-
-    cout << orc10->is_alive() << " " << gandalf->is_alive() << " " << sauron->is_alive() << " " << galadriel->is_alive() << " ";
-    cout << orc5->is_alive() << " " << celebrimbor->is_alive() << endl;
-    cout << orc10->get_saude() << " " << gandalf->get_saude() << " " << sauron->get_saude() << " " << galadriel->get_saude() << " ";
-    cout << orc5->get_saude() << " " << celebrimbor->get_saude() << endl;
-
-    gandalf->has_revived();
-
-
-    
-
 }

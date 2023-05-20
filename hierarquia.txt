@@ -1,0 +1,9 @@
+
+                        Soldado
+                
+        Mago            Bem                 Mal
+        
+        -istari         -anao               -Sauron
+        -rei bruxo      -Elfo               -Orc
+                        -Humano             -Balrog
+                          -gondoriano

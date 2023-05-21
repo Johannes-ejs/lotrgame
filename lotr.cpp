@@ -76,9 +76,9 @@ class Anao: public Soldado{
 class Humano: public Soldado{
 
     static size_t cid;
-    static size_t vergil;
-    static size_t talion;
-    static size_t minuano;
+    // static size_t vergil;
+    // static size_t talion;
+    // static size_t minuano;
     
     int stamina; // will be used for special attacks
     
@@ -262,7 +262,7 @@ class Mago: public Soldado{
 
         void armiger_verum_rex(){}
 
-        
+        // 2 more magic spells
 
         void has_revived(){
             if(revived) cout << "The mage has revived" << endl;
@@ -270,13 +270,41 @@ class Mago: public Soldado{
         }
 };
 
-class Vector: public vector<Soldado>{};
+class Vector{
+    Soldado** arr;
+    size_t sz;
+    size_t cp;
+
+    public:
+        Vector();
+
+        ~Vector() {erase(); delete[] arr;}
+
+        Vector(const Vector& other) = delete;
+        void push_back();
+        Soldado* pop_back();
+        void erase(){
+            for(size_t i=0; i < sz; i++) pop_back();
+            delete[] arr;
+            arr = new Soldado*[cp];
+        }
+
+        Soldado* operator[](size_t index){
+            if(index >= sz) throw logic_error("There is no " + to_string(index) + " element in this Vector");
+            return arr[index];
+        }
+
+};
 
 class Menu{
 
     bool game_over;
 
-    int gameplay_style; // sets the side the player is controlling (if he is playing)
+    enum class gameplay_style{
+        GOOD,
+        EVIL,
+        NPC
+    }; // sets the side the player is controlling (if he is playing)
 
     Vector sauron_army;
     Vector elf_army;
@@ -299,17 +327,21 @@ class Menu{
 
         bool over(){ return game_over;}
 
+        void log(){
+
+        }
+
 };
 
 
-size_t Sauron::count = 0;
+// size_t Sauron::count = 0;
 
 int main(){ 
     srand(time(NULL));
     Menu game;
     // Humano* cid = new Humano("Cid Kagenou", 10, 10);
-    Sauron s1(10,10);
-    Sauron s2(10,10);
+    // Sauron s1(10,10);
+    // Sauron s2(10,10);
     
     
     // proof of concept: printing and erasing characters

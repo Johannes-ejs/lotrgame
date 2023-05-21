@@ -19,25 +19,24 @@ class Soldado{
     string nome;
     int poder_ataque;
     int saude;
-    
-    protected:
-        void set_nome(string nome) { nome = nome; }
-        void set_saude(int saude) { saude = saude; }
-        void set_poder_ataque(int pa) { poder_ataque = pa; }
+    int stamina; // will be used for special attacks. Success rate and damage will rely on this statistic
 
-    public: 
+protected:
+    void set_nome(string nome) { nome = nome; }
+    void set_saude(int saude) { saude = saude; }
+    void set_poder_ataque(int pa) { poder_ataque = pa; }
 
-        Soldado(string nome, int hp, int pa): 
-            nome(nome), poder_ataque(pa), saude(hp) {}
-        Soldado(const Soldado& other) = delete;
-            
-        virtual string get_nome() { return nome; }
-        virtual int get_poder_ataque() { return poder_ataque; }
-        virtual int get_saude() { return saude; }
-        virtual void defesa(int pa){ saude -= pa;}
-        virtual void ataque(Soldado* other){ other->defesa(this->get_poder_ataque());}
-        virtual bool is_alive() { return saude >0; }
-        virtual void has_revived() {}
+public:
+    Soldado(string nome, int hp, int pa) : nome(nome), poder_ataque(pa), saude(hp) {}
+    Soldado(const Soldado &other) = delete;
+
+    virtual string get_nome() { return nome; }
+    virtual int get_poder_ataque() { return poder_ataque; }
+    virtual int get_saude() { return saude; }
+    virtual void defesa(int pa) { saude -= pa; }
+    virtual void ataque(Soldado *other) { other->defesa(this->get_poder_ataque()); }
+    virtual bool is_alive() { return saude > 0; }
+    virtual void has_revived() {}
 
 
 };
@@ -74,46 +73,12 @@ class Anao: public Soldado{
 };
 
 class Humano: public Soldado{
-
-    static size_t cid;
-    // static size_t vergil;
-    // static size_t talion;
-    // static size_t minuano;
     
-    int stamina; // will be used for special attacks
     
     public:
         Humano(string nome, int hp, int pa) : Soldado(nome, hp, pa) {
-            // if(cid == 2) throw incorrect_amount_error("There can only be one Eminence in Shadows");
-            // if(vergil == 2) throw incorrect_amount_error("There can only be one ");
-            // if(talion == 2) throw incorrect_amount_error("There can only be one undying one");
-            // if(minuano == 2) throw incorrect_amount_error("There can only be one brazilian");
         }
         
-        enum class ATOMIC_MODE{
-            NORMAL, // lot of dmg to all enemies
-            RECOVERY, // heal allies
-            SWORD, // probably instakill in 1 enemy
-            UTSUSEMI // massive dmg for 9 enemies
-        };
-
-        void I_AM_ATOMIC(){
-            cout << "\x1B[3m\x1B[1mPlaytime is over\x1B[0m" << endl;
-            this_thread::sleep_for(chrono::seconds(1));
-            cout << "The area is filled with a bluish magic" << endl;
-            this_thread::sleep_for(chrono::milliseconds(1500));
-            cout << "Allies and foes alike all stopped battling, and silently, fearfully stared at the source of the great magic" << endl;
-            this_thread::sleep_for(chrono::milliseconds(2500));
-            cout << "Let the true meaning of almighty be carved in your soul..." << endl;
-            this_thread::sleep_for(chrono::milliseconds(1500));
-            cout << "I..." << endl;
-            this_thread::sleep_for(chrono::milliseconds(1000));
-            cout << "\x1B[1mAM...\x1B[0m" << endl;
-            this_thread::sleep_for(chrono::milliseconds(1500));
-            cout << "\x1B[3matomic\x1B[0m" << endl;
-            // this_thread::sleep_for(chrono::seconds(2));
-            // cout << "A great explosion takes place" << endl;
-        }
         Humano(const Humano& other)= delete;
         
         void ataque(Soldado* other) override {
@@ -126,21 +91,76 @@ class Humano: public Soldado{
         // Special attacks: Battle Mode (Playtime is over), I AM ATOMIC, 
 };
 
-class Gondoriano: public Humano {
-    size_t is_berserk;
+class Eminence: public Humano {
+    static size_t num_obj;
+    size_t war_mode; // turns Cid immune to damage and with double damage and attack speed for 3 rounds
+    size_t HEART_BREAK;
 
-    Gondoriano(string nome, int hp, int pa) : Humano(nome, hp, pa), is_berserk() {}
+    public:
+
+    Eminence(int hp, int pa) : Humano("Shadow", hp, pa), war_mode(), HEART_BREAK() {
+        if(num_obj) throw incorrect_amount_error("There can only be one Eminence in Shadow");
+        num_obj++;
+    }
+
+    ~Eminence() { num_obj--;}
+
+    enum class ATOMIC_MODE{
+        NORMAL,   // lot of dmg to all enemies
+        RECOVERY, // heal allies
+        SWORD,    // probably instakill in 1 enemy
+        UTSUSEMI  // massive dmg for 9 enemies
+    };
+
+    void I_AM_ATOMIC(ATOMIC_MODE mode = ATOMIC_MODE::NORMAL){
+            cout << "\x1B[3m\x1B[1mPlaytime is over\x1B[0m" << endl;
+            this_thread::sleep_for(chrono::seconds(1));
+            cout << "The area is filled with a bluish magic" << endl;
+            this_thread::sleep_for(chrono::milliseconds(1500));
+            cout << "Allies and foes alike all stopped battling, and silently, fearfully stared at the source of the great magic" << endl;
+            this_thread::sleep_for(chrono::milliseconds(2500));
+            cout << "Let the true meaning of almighty be carved in your soul..." << endl;
+            this_thread::sleep_for(chrono::milliseconds(1500));
+            cout << "I..." << endl;
+            this_thread::sleep_for(chrono::milliseconds(1000));
+            cout << "\x1B[1mAM...\x1B[0m" << endl;
+            this_thread::sleep_for(chrono::milliseconds(1500));
+
+            if (mode == ATOMIC_MODE::RECOVERY){
+            cout << "\x1B[1mTHE RECOVERY...\x1B[0m" << endl;
+            this_thread::sleep_for(chrono::milliseconds(1500));
+            }
+
+            if (mode == ATOMIC_MODE::UTSUSEMI){
+            cout << "\x1B[1mTHE UTSUSEMI...\x1B[0m" << endl;
+            this_thread::sleep_for(chrono::milliseconds(1500));
+            }
+
+            if (mode == ATOMIC_MODE::SWORD)
+                cout << "\x1B[3mthe\x1B[0m ";
+
+            cout << "\x1B[3matomic\x1B[0m ";
+
+            if (mode == ATOMIC_MODE::SWORD || mode == ATOMIC_MODE::UTSUSEMI){
+            cout << "\x1B[3msword\x1B[0m";
+            this_thread::sleep_for(chrono::milliseconds(1500));
+            }
+            // this_thread::sleep_for(chrono::seconds(2));
+            // cout << "A great explosion takes place" << endl;
+    }
 
     void defesa(int pa) override {
+        if(war_mode || HEART_BREAK) return;
         set_saude(get_saude()-pa/2);
+        if(rand() % 100 == 0) heart_break();
     } 
 
-    void berserk(){
+    void overdrive(){
         cout << get_nome() << "'s blood is boiling..." << endl;
         set_poder_ataque(2*get_poder_ataque());
     }
 
-    void letargy(){
+    void heart_break(){
 
     }
 
@@ -149,14 +169,24 @@ class Gondoriano: public Humano {
     }
 
     void ataque(Soldado* other) override{
-        if(!is_berserk && rand()%100 == 0){
-            is_berserk = 3;
-            berserk();
+        if(HEART_BREAK){
+            HEART_BREAK--;
+            return;
         }
 
-        Humano::ataque(other);
+        if(!war_mode && rand()%100 == 0){
+            war_mode = 3;
+            overdrive();
+        }
 
-        
+        if(rand()%200)
+            Humano::ataque(other);
+        else{
+            int mode = rand()%4;
+            ATOMIC_MODE am = static_cast<ATOMIC_MODE>(mode); 
+            I_AM_ATOMIC(am);
+        }
+    
     }
 };
 
@@ -276,13 +306,14 @@ class Vector{
     size_t cp;
 
     public:
-        Vector();
+        Vector():cp(40), sz(), arr(new Soldado*[cp]) {}
 
         ~Vector() {erase(); delete[] arr;}
 
         Vector(const Vector& other) = delete;
         void push_back();
-        Soldado* pop_back();
+
+        Soldado* pop_back(){return nullptr;}
         void erase(){
             for(size_t i=0; i < sz; i++) pop_back();
             delete[] arr;
@@ -334,12 +365,14 @@ class Menu{
 };
 
 
-// size_t Sauron::count = 0;
+size_t Eminence::num_obj = 0;
 
 int main(){ 
     srand(time(NULL));
     Menu game;
-    // Humano* cid = new Humano("Cid Kagenou", 10, 10);
+    Soldado* cid = new Eminence(10, 10);
+    cid->ataque(cid);
+    // cid->I_AM_ATOMIC();
     // Sauron s1(10,10);
     // Sauron s2(10,10);
     
@@ -355,7 +388,6 @@ int main(){
     
     
     
-    // cid->I_AM_ATOMIC();
     
     // do{
     // game.instantiate();

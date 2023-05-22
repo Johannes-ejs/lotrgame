@@ -143,7 +143,7 @@ class Eminence: public Humano {
 
             if (mode == ATOMIC_MODE::SWORD || mode == ATOMIC_MODE::UTSUSEMI){
             cout << "\x1B[3msword\x1B[0m";
-            this_thread::sleep_for(chrono::milliseconds(1500));
+            // this_thread::sleep_for(chrono::milliseconds(1500));
             }
             // this_thread::sleep_for(chrono::seconds(2));
             // cout << "A great explosion takes place" << endl;
@@ -179,7 +179,8 @@ class Eminence: public Humano {
             overdrive();
         }
 
-        if(rand()%200)
+        if(0)
+        // if(rand()%200)
             Humano::ataque(other);
         else{
             int mode = rand()%4;
@@ -195,12 +196,12 @@ class Balrog: public Soldado{
     
     static size_t count;
 
-    // Balrog(){
-    //     if(count == 7) throw runtime_error("No more than 7 Balrogs survived the War of Wrath");
-    //     count++;
-    // }
+    Balrog(string nome, int hp, int pa): Soldado(nome,hp,pa){
+        if(count == 7) throw runtime_error("No more than 7 Balrogs survived the War of Wrath");
+        count++;
+    }
 
-    // ~Balrog(){}
+    ~Balrog(){ count--; }
 
     void defesa(int pa) override{
         if(rand()%10) Soldado::defesa(pa);
@@ -366,6 +367,8 @@ class Menu{
 
 
 size_t Eminence::num_obj = 0;
+size_t Balrog::count = 0;
+size_t Sauron::count = 0;
 
 int main(){ 
     srand(time(NULL));

@@ -13,35 +13,31 @@ class Soldado{
     double poder_ataque;
     double saude;
 
-protected:
-    void set_nome(string nome) { nome = nome; }
-    void set_saude(double saude) { saude = saude; }
-    void set_poder_ataque(double pa) { poder_ataque = pa; }
+    protected:
+        virtual void set_nome(string nome) { nome = nome; }
+        virtual void set_saude(double saude) { saude = saude; }
+        virtual void set_poder_ataque(double pa) { poder_ataque = pa; }
 
-public:
-    Soldado(string nome, double hp, double pa) : nome(nome), poder_ataque(pa), saude(hp) {}
-    Soldado(const Soldado &other) = delete;
+    public:
+        Soldado(string nome, double hp, double pa) : nome(nome), poder_ataque(pa), saude(hp) {}
+        Soldado(const Soldado &other) = delete;
 
-    virtual string get_nome() { return nome; }
-    virtual double get_poder_ataque() { return poder_ataque; }
-    virtual double get_saude() { return saude; }
-    virtual void defesa(double pa) { saude -= pa; }
-    virtual void true_damage(double pa) final { saude -= pa; }
-    virtual void ataque(Soldado *other) { other->defesa(this->get_poder_ataque()); }
-    virtual bool is_alive() { return saude > 0; }
-    virtual void has_revived() {}
-
-
+        virtual string get_nome() { return nome; }
+        virtual double get_poder_ataque() { return poder_ataque; }
+        virtual double get_saude() { return saude; }
+        virtual void defesa(double pa) { saude -= pa; }
+        virtual void true_damage(double pa) final { saude -= pa; }
+        virtual void ataque(Soldado *other) { other->defesa(this->get_poder_ataque()); }
+        virtual bool is_alive() { return saude > 0; }
+        virtual void resurrectio() {}
 };
 
 
 class Elfo: public Soldado{
     public:
-        
-        Elfo(string nome, double hp, double pa): Soldado(nome, hp, pa+1) {}
-        
+ 
+        Elfo(string nome, double hp, double pa): Soldado(nome, hp, pa+1) {}        
         Elfo(const Elfo& other)= delete;
-        
         void ataque(Soldado* other) override { Soldado::ataque(other); }        
 
 };
@@ -85,7 +81,7 @@ class Eminence: public Humano {
 
     public:
 
-    Eminence(double hp, double pa) : Humano("Shadow", hp, pa), WAR_MODE() {}
+    Eminence(double hp, double pa) : Humano("Shadow", hp, pa), WAR_MODE(false) {}
 
     ~Eminence() {}
 
@@ -127,7 +123,7 @@ class Eminence: public Humano {
     void ataque(Soldado* other) override{
 
 
-        if(!WAR_MODE && rand()%100 == 0)
+        if(!WAR_MODE && rand() % 100==0)
             overdrive();
 
         if(WAR_MODE){
@@ -136,7 +132,7 @@ class Eminence: public Humano {
             return;
         }
 
-        if(rand()%200)
+        if(rand()%1000)
             Humano::ataque(other);
         else{
             I_AM_ATOMIC(other);
@@ -180,7 +176,7 @@ class Balrog: public Soldado{
 
 
 class Sauron: public Soldado{
-    
+
     public:
 
         Sauron(double hp, double pa) : Soldado("Sauron", 10 * hp, pa){}
@@ -202,7 +198,7 @@ class Sauron: public Soldado{
 
 class Orc: public Soldado{
     public:
-        Orc(string nome, double pa, double hp): Soldado(nome, hp, pa) {}
+        Orc(string nome, double hp, double pa): Soldado(nome, hp, pa) {}
         Orc(const Orc& other)= delete;
         void ataque(Soldado *other) {
             if(rand() % 10 <= 1){
@@ -221,12 +217,12 @@ class Mago: public Soldado{
     double original_hp;
 
     public:
-        Mago(string nome, double pa, double hp) : Soldado(nome, hp, pa), revived(false), original_hp(hp) {}
+        Mago(string nome, double hp, double pa) : Soldado(nome, hp, pa), revived(false), original_hp(hp) {}
         Mago(const Mago& other)= delete;
 
         void ataque(Soldado *other) {
             if(!revived && get_saude() <=0 && rand()%20){
-                set_saude(original_hp/5);
+                set_saude(original_hp/2);
                 revived = true;
             }
             if(get_saude() <=0) return;
@@ -249,8 +245,9 @@ class Mago: public Soldado{
                 Soldado::defesa(pa);
         }
 
-        void resurrectio(){
+        void resurrectio() override{
             // Ressucita o mago. Mago levará 10 de dano a cada rodada e terá 1.5 vezes o P.A.
+            set_poder_ataque(1.5*get_poder_ataque());
         } // Declare in Soldado
 
 };
@@ -259,6 +256,11 @@ class Mago: public Soldado{
 class ReiBruxo: public Mago{
     public:
         ReiBruxo(string name, double hp, double pa): Mago(name,hp,pa) {}
+
+        void resurrectio() override{
+            // Ressucita o mago. Mago levará 10 de dano a cada rodada e terá 1.5 vezes o P.A.
+            set_poder_ataque(2*get_poder_ataque());
+        } // Declare in Soldado
         
         void defesa(double pa) override{
             Soldado::defesa(pa);
@@ -342,9 +344,60 @@ class Menu{
 
 
 int main(){ 
+    srand(time(NULL));
 
-    Menu game;
-    game.end_game();
+    Soldado* a1 = new Elfo("ksdjhbgjwbdg", 100, 9);
+    Soldado* a2 = new Anao("ksdjhbgjwbdg", 100, 9);
+    Soldado* a3 = new Humano("ksdjhbgjwbdg", 100, 9);
+    Soldado* a4 = new Eminence(100, 9);
+    Soldado* a5 = new Balrog("ksdjhbgjwbdg", 100, 9);
+    Soldado* a6 = new Mago("ksdjhbgjwbdg", 100, 9);
+    Soldado* a7 = new ReiBruxo("ksdjhbgjwbdg", 100, 9);
+    Soldado* a8 = new Sauron(100, 9);
+    Soldado* a9 = new Orc("ksdjhbgjwbdg", 100, 9);
+
+    for(int i=0; i<10; i++){
+        a8->ataque(a6);
+        a6->ataque(a8);
+    }
+
+
+    // cout << a1->get_saude() << endl;
+    // cout << a2->get_saude() << endl;
+    // cout << a3->get_saude() << endl;
+    // cout << a4->get_saude() << endl;
+    // cout << a5->get_saude() << endl;
+    cout << a6->get_saude() << endl;
+    // cout << a7->get_saude() << endl;
+    cout << a8->get_saude() << endl;
+    // cout << a9->get_saude() << endl;
+
+
+
+    // cout << a1->get_saude() << endl;
+    // cout << a2->get_saude() << endl;
+    // cout << a3->get_saude() << endl;
+    // cout << a4->get_saude() << endl;
+    // cout << a5->get_saude() << endl;
+    // cout << a6->get_saude() << endl;
+    // cout << a7->get_saude() << endl;
+    // cout << a8->get_saude() << endl;
+    // cout << a9->get_saude() << endl;
+
+
+
+
+    delete a1;
+    delete a2;
+    delete a3;
+    delete a4;
+    delete a5;
+    delete a6;
+    delete a7;
+    delete a8;
+    delete a9;
+
+    // Menu game;
     // do{
     //     game.run();
     // } while(!game.over())    

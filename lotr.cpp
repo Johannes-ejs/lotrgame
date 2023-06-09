@@ -7,13 +7,6 @@
 
 using namespace std;
 
-// class incorrect_amount_error : public exception{
-//     const char *message;
-//     public:
-//         incorrect_amount_error(const char* message): message(message) {}
-//         const char* what() const noexcept override{ return  message;}
-// };
-
 
 class Soldado{
     string nome;
@@ -41,6 +34,7 @@ public:
 
 };
 
+
 class Elfo: public Soldado{
     public:
         
@@ -51,6 +45,7 @@ class Elfo: public Soldado{
         void ataque(Soldado* other) override { Soldado::ataque(other); }        
 
 };
+
 
 class Anao: public Soldado{
     public:
@@ -65,6 +60,7 @@ class Anao: public Soldado{
         }
 
 };
+
 
 class Humano: public Soldado{
     
@@ -82,6 +78,7 @@ class Humano: public Soldado{
         }
 
 };
+
 
 class Eminence: public Humano {
     size_t WAR_MODE; // turns Shadow immune to damage and with double damage and attack speed for 3 rounds
@@ -181,11 +178,11 @@ class Balrog: public Soldado{
 
 };
 
+
 class Sauron: public Soldado{
-
-
+    
     public:
-    // static size_t count;
+
         Sauron(double hp, double pa) : Soldado("Sauron", 10 * hp, pa){}
         Sauron(const Sauron &other) = delete;
         
@@ -202,6 +199,7 @@ class Sauron: public Soldado{
 
 };
 
+
 class Orc: public Soldado{
     public:
         Orc(string nome, double pa, double hp): Soldado(nome, hp, pa) {}
@@ -215,8 +213,6 @@ class Orc: public Soldado{
             } else Soldado::ataque(other);
         }
 };
-
-
 
 
 class Mago: public Soldado{
@@ -259,6 +255,7 @@ class Mago: public Soldado{
 
 };
 
+
 class ReiBruxo: public Mago{
     public:
         ReiBruxo(string name, double hp, double pa): Mago(name,hp,pa) {}
@@ -267,6 +264,7 @@ class ReiBruxo: public Mago{
             Soldado::defesa(pa);
         }
 };
+
 
 class Menu{
 
@@ -305,7 +303,6 @@ class Menu{
             int size = prelude();
             sauron_army.clear();
             elf_army.clear();
-            // Only one Witch King, Sauron and Eminence allowed
         }
 
         void log(){
@@ -343,24 +340,12 @@ class Menu{
 };
 
 
-// size_t Eminence::num_obj = 0;
 
 int main(){ 
 
-
-    // Menu game;
-    // game.end_game();
+    Menu game;
+    game.end_game();
     // do{
     //     game.run();
-    // } while(!game.over())
-    
-    
-    // proof of concept: printing and erasing characters
-    // cout.sync_with_stdio(false);
-    // for(int i = 0; i < 10; i++){
-    //     cout << i << flush;
-    //     this_thread::sleep_for(chrono::milliseconds(100));
-    //     cout << "\b" << flush;
-    // }
-    // cout.sync_with_stdio(true);    
+    // } while(!game.over())    
 }

@@ -17,27 +17,26 @@ using namespace std;
 
 class Soldado{
     string nome;
-    int poder_ataque;
-    int saude;
-    int stamina; // will be used for special attacks. Success rate and damage will rely on this statistic
+    double poder_ataque;
+    double saude;
 
 protected:
     void set_nome(string nome) { nome = nome; }
-    void set_saude(int saude) { saude = saude; }
-    void set_poder_ataque(int pa) { poder_ataque = pa; }
+    void set_saude(double saude) { saude = saude; }
+    void set_poder_ataque(double pa) { poder_ataque = pa; }
 
 public:
-    Soldado(string nome, int hp, int pa) : nome(nome), poder_ataque(pa), saude(hp) {}
+    Soldado(string nome, double hp, double pa) : nome(nome), poder_ataque(pa), saude(hp) {}
     Soldado(const Soldado &other) = delete;
 
     virtual string get_nome() { return nome; }
-    virtual int get_poder_ataque() { return poder_ataque; }
-    virtual int get_saude() { return saude; }
-    virtual void defesa(int pa) { saude -= pa; }
-    virtual void true_damage(int pa) { saude -= pa; }
+    virtual double get_poder_ataque() { return poder_ataque; }
+    virtual double get_saude() { return saude; }
+    virtual void defesa(double pa) { saude -= pa; }
+    virtual void true_damage(double pa) final { saude -= pa; }
     virtual void ataque(Soldado *other) { other->defesa(this->get_poder_ataque()); }
     virtual bool is_alive() { return saude > 0; }
-    virtual void has_revived() = 0;
+    virtual void has_revived() {}
 
 
 };
@@ -45,25 +44,24 @@ public:
 class Elfo: public Soldado{
     public:
         
-        Elfo(string nome, int hp, int pa): Soldado(nome, hp, pa+1) {}
+        Elfo(string nome, double hp, double pa): Soldado(nome, hp, pa+1) {}
         
         Elfo(const Elfo& other)= delete;
         
-        void ataque(Soldado* other) override { if(get_saude() > 0)other->defesa(this->get_poder_ataque()); }        
+        void ataque(Soldado* other) override { Soldado::ataque(other); }        
 
 };
 
 class Anao: public Soldado{
     public:
         
-        Anao(string nome, int hp, int pa) : Soldado(nome, hp, pa + 20) {}
+        Anao(string nome, double hp, double pa) : Soldado(nome, hp, pa + 20) {}
         
         Anao(const Anao& other)= delete;
         
         void ataque(Soldado* other) override {
-            if (get_saude() > 0) return; 
             if (!(rand() % 5 <= 1))
-            other->defesa(this->get_poder_ataque());
+                Soldado::ataque(other);
         }
 
 };
@@ -72,26 +70,25 @@ class Humano: public Soldado{
     
     
     public:
-        Humano(string nome, int hp, int pa) : Soldado(nome, hp, pa) {
+        Humano(string nome, double hp, double pa) : Soldado(nome, hp, pa) {
         }
         
         Humano(const Humano& other)= delete;
         
         void ataque(Soldado* other) override {
-            if(get_saude()<=0) return;
-            other->defesa(this->get_poder_ataque()); 
-            if(!(rand()%10)) other->defesa(this->get_poder_ataque());
+            Soldado::ataque(other);
+            if(!(rand()%10))
+                Soldado::ataque(other);
         }
 
 };
 
 class Eminence: public Humano {
     size_t WAR_MODE; // turns Shadow immune to damage and with double damage and attack speed for 3 rounds
-    size_t HEART_BREAK;
 
     public:
 
-    Eminence(int hp, int pa) : Humano("Shadow", hp, pa), WAR_MODE(), HEART_BREAK() {}
+    Eminence(double hp, double pa) : Humano("Shadow", hp, pa), WAR_MODE() {}
 
     ~Eminence() {}
 
@@ -114,21 +111,16 @@ class Eminence: public Humano {
         // cout << "A great explosion takes place" << endl;
     }
 
-    void defesa(int pa) override {
-        if(WAR_MODE || HEART_BREAK) return;
-        set_saude(get_saude()-pa/2);
-        if(rand() % 100 == 0) heart_break();
+    void defesa(double pa) override {
+        if(WAR_MODE) return;
+        Soldado::defesa(pa/2);
     } 
 
     void overdrive(){
         cout << "Now... " << flush; 
         this_thread::sleep_for(chrono::milliseconds(700));
         cout << "\x1B[1mI am a little motivated\x1B[0m" << endl;
-        set_poder_ataque(2*get_poder_ataque());
-    }
-
-    void heart_break(){
-        // too lazy to implement
+        WAR_MODE = 3;
     }
 
     void normal(){
@@ -136,14 +128,15 @@ class Eminence: public Humano {
     }
 
     void ataque(Soldado* other) override{
-        if(HEART_BREAK){
-            HEART_BREAK--;
-            return;
-        }
 
-        if(!WAR_MODE && rand()%100 == 0){
-            WAR_MODE = 3;
+
+        if(!WAR_MODE && rand()%100 == 0)
             overdrive();
+
+        if(WAR_MODE){
+            WAR_MODE--;
+            other->true_damage(get_poder_ataque());
+            return;
         }
 
         if(rand()%200)
@@ -158,26 +151,33 @@ class Eminence: public Humano {
 
 class Balrog: public Soldado{
     
+    bool IS_BERSERK;
+    double original_hp;
 
-    Balrog(string nome, int hp, int pa): Soldado(nome, hp, pa){}
+    public:
+    
+        Balrog(string nome, double hp, double pa): Soldado(nome, hp, pa), IS_BERSERK(false), original_hp(hp) {}
 
 
-    void defesa(int pa) override{
-        if(rand()%10) Soldado::defesa(pa);
-    }
+        void defesa(double pa) override{
+            if(!IS_BERSERK) Soldado::defesa(pa);
+            else Soldado::defesa(pa/5);
+            if(!IS_BERSERK && get_saude() < original_hp/5) berserk();
+        }
 
-    void berserk(){
-        // below certain amount of health, Balrog will permanently be berserk, dealing only true damage
-        cout << "\x1B[3mThe air is getting warmer around " << get_nome() << "..." <<"\x1B[0m" << endl;
-    }
+        void berserk(){
+            cout << "\x1B[3mThe air is getting warmer around " << get_nome() << "..." <<"\x1B[0m" << endl;
+            this_thread::sleep_for(chrono::milliseconds(700));
+            IS_BERSERK = true;
+            set_poder_ataque(1.25*get_poder_ataque());
+        }
 
-    void ataque(Soldado* other) override{
-        // idk what to do
-    }
-
-    // void long_range_attack(){
-        // idk what to do
-    // }
+        void ataque(Soldado* other) override{
+            Soldado::ataque(other);
+            Soldado::ataque(other);
+            if (rand()%20 == 0 || IS_BERSERK)
+                Soldado::ataque(other);
+        }
 
 };
 
@@ -186,76 +186,87 @@ class Sauron: public Soldado{
 
     public:
     // static size_t count;
-        Sauron(int hp, int pa) : Soldado("Sauron", 10 * hp, pa){}
+        Sauron(double hp, double pa) : Soldado("Sauron", 10 * hp, pa){}
         Sauron(const Sauron &other) = delete;
         
         ~Sauron(){}
         
         void ataque(Soldado *other) {
-            if(get_saude()<=0) return;
             if(rand() % 10 <=2){
-                other->defesa(2 * this->get_poder_ataque());
-                other->defesa(2 * this->get_poder_ataque());
-            } else other->defesa(this->get_poder_ataque());
+                set_poder_ataque(2*get_poder_ataque());
+                Soldado::ataque(other);
+                Soldado::ataque(other);
+                set_poder_ataque(get_poder_ataque()/2);
+            } else Soldado::ataque(other);
         }
 
 };
 
 class Orc: public Soldado{
     public:
-        Orc(string nome, int pa, int hp): Soldado(nome, hp, pa) {}
+        Orc(string nome, double pa, double hp): Soldado(nome, hp, pa) {}
         Orc(const Orc& other)= delete;
         void ataque(Soldado *other) {
             if(rand() % 10 <= 1){
-                other->defesa(this->get_poder_ataque()*1.1);
-                other->defesa(this->get_poder_ataque()*1.1);
-            } else other->defesa(this->get_poder_ataque());
+                set_poder_ataque(1.1*get_poder_ataque());
+                Soldado::ataque(other);
+                Soldado::ataque(other);
+                set_poder_ataque(get_poder_ataque()/1.1);
+            } else Soldado::ataque(other);
         }
 };
 
-class ReiBruxo{
-
-};
 
 
 
 class Mago: public Soldado{
     
     bool revived;
+    double original_hp;
 
     public:
-        Mago(string nome, int pa, int hp) : Soldado(nome, hp, pa), revived(false) {}
+        Mago(string nome, double pa, double hp) : Soldado(nome, hp, pa), revived(false), original_hp(hp) {}
         Mago(const Mago& other)= delete;
 
         void ataque(Soldado *other) {
             if(!revived && get_saude() <=0 && rand()%20){
-                set_saude(20);
+                set_saude(original_hp/5);
                 revived = true;
             }
             if(get_saude() <=0) return;
             
             int random_var = rand();
             if (random_var % 25 == 0){
-                defesa(this->get_poder_ataque());
+                Soldado::defesa(this->get_poder_ataque());
             }
             else if (random_var % 10 == 0){
-                other->defesa(this->get_poder_ataque() * 1.5);
+                set_poder_ataque(1.5*get_poder_ataque());
+                Soldado::ataque(other);
+                set_poder_ataque(get_poder_ataque()/1.5);
             } else
-                other->defesa(this->get_poder_ataque());
+                Soldado::ataque(other);
         }
 
-        void avada_kedavra() {} // Declare in Soldado
-
-        void armiger_verum_rex() {} // Declare in Soldado
-
-        void resurrectio(){} // Declare in Soldado
-
-        void has_revived(){
-            if(revived) cout << "The mage has revived" << endl;
-            else cout << "The mage has not revived" << endl;
+        void defesa(double pa) override {
+            if(revived)
+                set_saude(get_saude()-10);
+                Soldado::defesa(pa);
         }
+
+        void resurrectio(){
+            // Ressucita o mago. Mago levará 10 de dano a cada rodada e terá 1.5 vezes o P.A.
+        } // Declare in Soldado
+
 };
 
+class ReiBruxo: public Mago{
+    public:
+        ReiBruxo(string name, double hp, double pa): Mago(name,hp,pa) {}
+        
+        void defesa(double pa) override{
+            Soldado::defesa(pa);
+        }
+};
 
 class Menu{
 
@@ -335,8 +346,10 @@ class Menu{
 // size_t Eminence::num_obj = 0;
 
 int main(){ 
-    Menu game;
-    game.end_game();
+
+
+    // Menu game;
+    // game.end_game();
     // do{
     //     game.run();
     // } while(!game.over())

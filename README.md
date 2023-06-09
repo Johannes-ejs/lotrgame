@@ -8,3 +8,11 @@ Missing:
 - implementar ReiBruxo
 - implementar Balrog
 - implementar Menu
+- Modificar todas as declarações de tipo de hp e pa para double
+
+### Limitadores:
+
+- 1 Eminence
+- 1 Sauron
+- 2 ReiBruxos
+- 2 Balrogs

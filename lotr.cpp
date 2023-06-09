@@ -7,12 +7,12 @@
 
 using namespace std;
 
-class incorrect_amount_error : public exception{
-    const char *message;
-    public:
-        incorrect_amount_error(const char* message): message(message) {}
-        const char* what() const noexcept override{ return  message;}
-};
+// class incorrect_amount_error : public exception{
+//     const char *message;
+//     public:
+//         incorrect_amount_error(const char* message): message(message) {}
+//         const char* what() const noexcept override{ return  message;}
+// };
 
 
 class Soldado{
@@ -34,9 +34,10 @@ public:
     virtual int get_poder_ataque() { return poder_ataque; }
     virtual int get_saude() { return saude; }
     virtual void defesa(int pa) { saude -= pa; }
+    virtual void true_damage(int pa) { saude -= pa; }
     virtual void ataque(Soldado *other) { other->defesa(this->get_poder_ataque()); }
     virtual bool is_alive() { return saude > 0; }
-    virtual void has_revived() {}
+    virtual void has_revived() = 0;
 
 
 };
@@ -92,76 +93,54 @@ class Humano: public Soldado{
 };
 
 class Eminence: public Humano {
-    static size_t num_obj;
-    size_t war_mode; // turns Cid immune to damage and with double damage and attack speed for 3 rounds
+    // static size_t num_obj;
+    size_t WAR_MODE; // turns Cid immune to damage and with double damage and attack speed for 3 rounds
     size_t HEART_BREAK;
 
     public:
 
-    Eminence(int hp, int pa) : Humano("Shadow", hp, pa), war_mode(), HEART_BREAK() {
-        if(num_obj) throw incorrect_amount_error("There can only be one Eminence in Shadow");
-        num_obj++;
+    Eminence(int hp, int pa) : Humano("Shadow", hp, pa), WAR_MODE(), HEART_BREAK() {
+        // if(num_obj) throw incorrect_amount_error("There can only be one Eminence in Shadow");
+        // num_obj++;
     }
 
-    ~Eminence() { num_obj--;}
+    ~Eminence() { /*num_obj--;*/ }
 
-    enum class ATOMIC_MODE{
-        NORMAL,   // lot of dmg to all enemies
-        RECOVERY, // heal allies
-        SWORD,    // probably instakill in 1 enemy
-        UTSUSEMI  // massive dmg for 9 enemies
-    };
-
-    void I_AM_ATOMIC(ATOMIC_MODE mode = ATOMIC_MODE::NORMAL){
-            cout << "\x1B[3m\x1B[1mPlaytime is over\x1B[0m" << endl;
-            this_thread::sleep_for(chrono::seconds(1));
-            cout << "The area is filled with a bluish magic" << endl;
-            this_thread::sleep_for(chrono::milliseconds(1500));
-            cout << "Allies and foes alike all stopped battling, and silently, fearfully stared at the source of the great magic" << endl;
-            this_thread::sleep_for(chrono::milliseconds(2500));
-            cout << "Let the true meaning of almighty be carved in your soul..." << endl;
-            this_thread::sleep_for(chrono::milliseconds(1500));
-            cout << "I..." << endl;
-            this_thread::sleep_for(chrono::milliseconds(1000));
-            cout << "\x1B[1mAM...\x1B[0m" << endl;
-            this_thread::sleep_for(chrono::milliseconds(1500));
-
-            if (mode == ATOMIC_MODE::RECOVERY){
-            cout << "\x1B[1mTHE RECOVERY...\x1B[0m" << endl;
-            this_thread::sleep_for(chrono::milliseconds(1500));
-            }
-
-            if (mode == ATOMIC_MODE::UTSUSEMI){
-            cout << "\x1B[1mTHE UTSUSEMI...\x1B[0m" << endl;
-            this_thread::sleep_for(chrono::milliseconds(1500));
-            }
-
-            if (mode == ATOMIC_MODE::SWORD)
-                cout << "\x1B[3mthe\x1B[0m ";
-
-            cout << "\x1B[3matomic\x1B[0m ";
-
-            if (mode == ATOMIC_MODE::SWORD || mode == ATOMIC_MODE::UTSUSEMI){
-            cout << "\x1B[3msword\x1B[0m";
-            this_thread::sleep_for(chrono::milliseconds(1500));
-            }
-            // this_thread::sleep_for(chrono::seconds(2));
-            // cout << "A great explosion takes place" << endl;
+    void I_AM_ATOMIC(Soldado* other){
+        // Insta-kill skill 
+        cout << "\x1B[3m\x1B[1mPlaytime is over\x1B[0m" << endl;
+        this_thread::sleep_for(chrono::seconds(1));
+        cout << "The area is filled with a bluish magic" << endl;
+        this_thread::sleep_for(chrono::milliseconds(1500));
+        cout << "Allies and foes alike all stopped battling, and silently, fearfully stared at the source of the great magic" << endl;
+        this_thread::sleep_for(chrono::milliseconds(2500));
+        cout << "Let the true meaning of almighty be carved in your soul..." << endl;
+        this_thread::sleep_for(chrono::milliseconds(1500));
+        cout << "I..." << endl;
+        this_thread::sleep_for(chrono::milliseconds(1000));
+        cout << "\x1B[1mAM...\x1B[0m" << endl;
+        this_thread::sleep_for(chrono::milliseconds(1500));
+        cout << "\x1B[3matomic\x1B[0m ";
+        other->true_damage(999999);
+        // this_thread::sleep_for(chrono::seconds(2));
+        // cout << "A great explosion takes place" << endl;
     }
 
     void defesa(int pa) override {
-        if(war_mode || HEART_BREAK) return;
+        if(WAR_MODE || HEART_BREAK) return;
         set_saude(get_saude()-pa/2);
         if(rand() % 100 == 0) heart_break();
     } 
 
     void overdrive(){
-        cout << get_nome() << "'s blood is boiling..." << endl;
+        cout << "Now... " << flush; 
+        this_thread::sleep_for(chrono::milliseconds(700));
+        cout << "\x1B[1mI am a little motivated\x1B[0m" << endl;
         set_poder_ataque(2*get_poder_ataque());
     }
 
     void heart_break(){
-
+        
     }
 
     void normal(){
@@ -174,17 +153,15 @@ class Eminence: public Humano {
             return;
         }
 
-        if(!war_mode && rand()%100 == 0){
-            war_mode = 3;
+        if(!WAR_MODE && rand()%100 == 0){
+            WAR_MODE = 3;
             overdrive();
         }
 
         if(rand()%200)
             Humano::ataque(other);
         else{
-            int mode = rand()%4;
-            ATOMIC_MODE am = static_cast<ATOMIC_MODE>(mode); 
-            I_AM_ATOMIC(am);
+            I_AM_ATOMIC(other);
         }
     
     }
@@ -193,21 +170,17 @@ class Eminence: public Humano {
 
 class Balrog: public Soldado{
     
-    static size_t count;
 
-    // Balrog(){
-    //     if(count == 7) throw runtime_error("No more than 7 Balrogs survived the War of Wrath");
-    //     count++;
-    // }
+    Balrog(string nome, int hp, int pa): Soldado(nome, hp, pa){}
 
-    // ~Balrog(){}
 
     void defesa(int pa) override{
         if(rand()%10) Soldado::defesa(pa);
     }
 
     void berserk(){
-        cout << "\x1B[3mThe air is getting warmer around " << get_nome() << "\x1B[0m" << endl;
+        cout << "\x1B[3mThe air is getting warmer around " << get_nome() << "..." <<"\x1B[0m" << endl;
+        // TODO: Implement True Damage (somehow)
     }
 
     void ataque(Soldado* other) override{
@@ -224,14 +197,14 @@ class Sauron: public Soldado{
 
 
     public:
-    static size_t count;
+    // static size_t count;
         Sauron(int hp, int pa) : Soldado("Sauron", 10 * hp, pa){
-            count++;
-            if(count == 2) throw incorrect_amount_error("There can only be one Dark Lord");
+            // count++;
+            // if(count == 2) throw incorrect_amount_error("There can only be one Dark Lord");
         }
         Sauron(const Sauron &other) = delete;
         
-        ~Sauron(){count--;}
+        ~Sauron(){ /*count--;*/ }
         
         void ataque(Soldado *other) {
             if(get_saude()<=0) return;
@@ -256,6 +229,7 @@ class Orc: public Soldado{
 };
 
 class ReiBruxo{
+    // Corrupção: a ser usado no jogo de verdade
 
 };
 
@@ -265,7 +239,7 @@ class Mago: public Soldado{
     
     bool revived;
     
-    int mana; // will be used for special attacks
+    // int mana; // will be used for special attacks
 
     public:
         Mago(string nome, int pa, int hp) : Soldado(nome, hp, pa), revived(false) {}
@@ -288,11 +262,11 @@ class Mago: public Soldado{
                 other->defesa(this->get_poder_ataque());
         }
 
-        void avada_kedavra(){}
+        void avada_kedavra() {} // Declare in Soldado
 
-        void armiger_verum_rex(){}
+        void armiger_verum_rex() {} // Declare in Soldado
 
-        // 2 more magic spells
+        void resurrectio(){} // Declare in Soldado
 
         void has_revived(){
             if(revived) cout << "The mage has revived" << endl;
@@ -300,81 +274,91 @@ class Mago: public Soldado{
         }
 };
 
-class Vector{
-    Soldado** arr;
-    size_t sz;
-    size_t cp;
-
-    public:
-        Vector():cp(40), sz(), arr(new Soldado*[cp]) {}
-
-        ~Vector() {erase(); delete[] arr;}
-
-        Vector(const Vector& other) = delete;
-        void push_back();
-
-        Soldado* pop_back(){return nullptr;}
-        void erase(){
-            for(size_t i=0; i < sz; i++) pop_back();
-            delete[] arr;
-            arr = new Soldado*[cp];
-        }
-
-        Soldado* operator[](size_t index){
-            if(index >= sz) throw logic_error("There is no " + to_string(index) + " element in this Vector");
-            return arr[index];
-        }
-
-};
 
 class Menu{
 
     bool game_over;
 
-    enum class gameplay_style{
-        GOOD,
-        EVIL,
-        NPC
-    }; // sets the side the player is controlling (if he is playing)
+    // enum class gameplay_style{
+    //     GOOD,
+    //     EVIL,
+    //     NPC
+    // }; // sets the side the player is controlling (if he is playing)
 
-    Vector sauron_army;
-    Vector elf_army;
+    vector<Soldado*> sauron_army;
+    vector<Soldado*> elf_army;
 
     public:
 
         Menu(){
-
+            srand(time(NULL));
+            instantiate();
         }
 
         Menu(const Menu& other) = delete;
 
-        void run(){
-
+        int prelude(){
+            int i;
+            cout << "\x1B[32mWelcome to Lord of The Rings: ... \x1B[0m" << endl;
+            do{
+                cout <<  "How many characters would you like to have in each army?" << endl;
+                cin >> i;
+                cout << "The number must be positive! Let's try again..." << endl;
+                this_thread::sleep_for(chrono::milliseconds(300));
+            } while (i <= 0);
+            return i;
         }
 
         void instantiate(){
-
+            int size = prelude();
+            sauron_army.clear();
+            elf_army.clear();
+            // Only one Witch King, Sauron and Eminence allowed
         }
-
-        bool over(){ return game_over;}
 
         void log(){
 
         }
 
+        void run(){
+
+        }
+
+        void results(){
+
+        }
+
+        void end_game(){
+            char c;
+            cout << "Would you like to play again? (Y/N) ";
+            cin >> c;
+            if(c != 'Y'){
+                cout << "Alright. Bye!" << endl;
+                game_over = true;
+            } else{
+                cout << "Alright! Restarting session" << flush;
+                for(int i=0; i< 3; i++){
+                    this_thread::sleep_for(chrono::milliseconds(300));
+                    cout << "." << flush;
+                }
+                this_thread::sleep_for(chrono::milliseconds(500));
+                instantiate();
+            }
+        }
+
+        bool over(){ return game_over;}
+
 };
 
 
-size_t Eminence::num_obj = 0;
+// size_t Eminence::num_obj = 0;
 
 int main(){ 
-    srand(time(NULL));
     Menu game;
-    Soldado* cid = new Eminence(10, 10);
-    cid->ataque(cid);
-    // cid->I_AM_ATOMIC();
-    // Sauron s1(10,10);
-    // Sauron s2(10,10);
+    game.end_game();
+    // do{
+    //     game.run();
+    // } while(!game.over())
     
     
     // proof of concept: printing and erasing characters
@@ -384,14 +368,5 @@ int main(){
     //     this_thread::sleep_for(chrono::milliseconds(100));
     //     cout << "\b" << flush;
     // }
-    // cout.sync_with_stdio(true);
-    
-    
-    
-    
-    // do{
-    // game.instantiate();
-    // game.run();
-    // } while(!game.over());
-    
+    // cout.sync_with_stdio(true);    
 }

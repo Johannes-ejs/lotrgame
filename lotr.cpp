@@ -49,11 +49,7 @@ class Elfo: public Soldado{
         
         Elfo(const Elfo& other)= delete;
         
-        void ataque(Soldado* other) override { if(get_saude() > 0)other->defesa(this->get_poder_ataque()); }
-        
-        void long_range(){}
-        
-        void special(){}
+        void ataque(Soldado* other) override { if(get_saude() > 0)other->defesa(this->get_poder_ataque()); }        
 
 };
 
@@ -70,7 +66,6 @@ class Anao: public Soldado{
             other->defesa(this->get_poder_ataque());
         }
 
-        void rage_beneath_the_mountains(){}
 };
 
 class Humano: public Soldado{
@@ -88,26 +83,19 @@ class Humano: public Soldado{
             if(!(rand()%10)) other->defesa(this->get_poder_ataque());
         }
 
-        // Special treatment to human called Cid Kagenou
-        // Special attacks: Battle Mode (Playtime is over), I AM ATOMIC, 
 };
 
 class Eminence: public Humano {
-    // static size_t num_obj;
-    size_t WAR_MODE; // turns Cid immune to damage and with double damage and attack speed for 3 rounds
+    size_t WAR_MODE; // turns Shadow immune to damage and with double damage and attack speed for 3 rounds
     size_t HEART_BREAK;
 
     public:
 
-    Eminence(int hp, int pa) : Humano("Shadow", hp, pa), WAR_MODE(), HEART_BREAK() {
-        // if(num_obj) throw incorrect_amount_error("There can only be one Eminence in Shadow");
-        // num_obj++;
-    }
+    Eminence(int hp, int pa) : Humano("Shadow", hp, pa), WAR_MODE(), HEART_BREAK() {}
 
-    ~Eminence() { /*num_obj--;*/ }
+    ~Eminence() {}
 
     void I_AM_ATOMIC(Soldado* other){
-        // Insta-kill skill 
         cout << "\x1B[3m\x1B[1mPlaytime is over\x1B[0m" << endl;
         this_thread::sleep_for(chrono::seconds(1));
         cout << "The area is filled with a bluish magic" << endl;
@@ -140,11 +128,11 @@ class Eminence: public Humano {
     }
 
     void heart_break(){
-        
+        // too lazy to implement
     }
 
     void normal(){
-
+        // too lazy to implement
     }
 
     void ataque(Soldado* other) override{
@@ -179,17 +167,17 @@ class Balrog: public Soldado{
     }
 
     void berserk(){
+        // below certain amount of health, Balrog will permanently be berserk, dealing only true damage
         cout << "\x1B[3mThe air is getting warmer around " << get_nome() << "..." <<"\x1B[0m" << endl;
-        // TODO: Implement True Damage (somehow)
     }
 
     void ataque(Soldado* other) override{
-
+        // idk what to do
     }
 
-    void long_range_attack(){
-
-    }
+    // void long_range_attack(){
+        // idk what to do
+    // }
 
 };
 
@@ -198,13 +186,10 @@ class Sauron: public Soldado{
 
     public:
     // static size_t count;
-        Sauron(int hp, int pa) : Soldado("Sauron", 10 * hp, pa){
-            // count++;
-            // if(count == 2) throw incorrect_amount_error("There can only be one Dark Lord");
-        }
+        Sauron(int hp, int pa) : Soldado("Sauron", 10 * hp, pa){}
         Sauron(const Sauron &other) = delete;
         
-        ~Sauron(){ /*count--;*/ }
+        ~Sauron(){}
         
         void ataque(Soldado *other) {
             if(get_saude()<=0) return;
@@ -229,7 +214,6 @@ class Orc: public Soldado{
 };
 
 class ReiBruxo{
-    // Corrupção: a ser usado no jogo de verdade
 
 };
 
@@ -238,8 +222,6 @@ class ReiBruxo{
 class Mago: public Soldado{
     
     bool revived;
-    
-    // int mana; // will be used for special attacks
 
     public:
         Mago(string nome, int pa, int hp) : Soldado(nome, hp, pa), revived(false) {}
@@ -277,13 +259,7 @@ class Mago: public Soldado{
 
 class Menu{
 
-    bool game_over;
-
-    // enum class gameplay_style{
-    //     GOOD,
-    //     EVIL,
-    //     NPC
-    // }; // sets the side the player is controlling (if he is playing)
+    bool GAME_OVER;
 
     vector<Soldado*> sauron_army;
     vector<Soldado*> elf_army;
@@ -303,8 +279,13 @@ class Menu{
             do{
                 cout <<  "How many characters would you like to have in each army?" << endl;
                 cin >> i;
-                cout << "The number must be positive! Let's try again..." << endl;
-                this_thread::sleep_for(chrono::milliseconds(300));
+                cout << "The number must be positive! Let's try again" << flush;
+                for (int i = 0; i < 3; i++){
+                    this_thread::sleep_for(chrono::milliseconds(300));
+                    cout << "." << flush;
+                }
+                this_thread::sleep_for(chrono::milliseconds(500));
+
             } while (i <= 0);
             return i;
         }
@@ -324,7 +305,7 @@ class Menu{
 
         }
 
-        void results(){
+        void final_results(){
 
         }
 
@@ -334,7 +315,7 @@ class Menu{
             cin >> c;
             if(c != 'Y'){
                 cout << "Alright. Bye!" << endl;
-                game_over = true;
+                GAME_OVER = true;
             } else{
                 cout << "Alright! Restarting session" << flush;
                 for(int i=0; i< 3; i++){
@@ -346,7 +327,7 @@ class Menu{
             }
         }
 
-        bool over(){ return game_over;}
+        bool over(){ return GAME_OVER;}
 
 };
 

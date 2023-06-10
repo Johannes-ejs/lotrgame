@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <random> // used for normal_distribution. NOTE: WORKS ONLY ON C++11 AND ABOVE
+#include <queue>
 
 
 using namespace std;
@@ -269,7 +270,7 @@ class Mago: public Soldado{
             int random_var = rand();
             if (random_var % 25 == 0)
                 true_damage(this, this->get_poder_ataque());
-                
+
             else if (random_var % 10 == 0){
                 set_poder_ataque(1.5*get_poder_ataque());
                 Soldado::ataque(other);
@@ -316,86 +317,250 @@ class ReiBruxo: public Mago{
         }
 };
 
-
 class Menu{
 
-    bool GAME_OVER;
+        bool GAME_OVER;
 
-    vector<Soldado*> sauron_army;
-    vector<Soldado*> elf_army;
+        queue<Soldado *> sauron_army;
+        queue<Soldado *> elf_army;
+        queue<Soldado *> can_resurrect;
+        int sauron_size;
+        int elf_size;
+        int hp;
+        int pa;
 
     public:
-
-        Menu(){
+        Menu(int hp, int pa) : hp(hp), pa(pa){
             srand(time(NULL));
             instantiate();
         }
 
-        Menu(const Menu& other) = delete;
+        Menu(const Menu &other) = delete;
 
-        int prelude(){
+        int prelude_sauron(){
             int i;
             cout << "\x1B[32mWelcome to Lord of The Rings: ... \x1B[0m" << endl;
-            do{
-                cout <<  "How many characters would you like to have in each army?" << endl;
-                cin >> i;
+            cout << "How many characters would you like to have in sauron army?" << endl;
+            cin >> i;
+            while (!i > 0){
                 cout << "The number must be positive! Let's try again" << flush;
                 for (int i = 0; i < 3; i++){
                     this_thread::sleep_for(chrono::milliseconds(300));
                     cout << "." << flush;
                 }
-                this_thread::sleep_for(chrono::milliseconds(500));
+            }
+            cout << "Sauron is in the army, so you need to choose the race of his soldiers" << endl;
+            Soldado *sauron = new Sauron(hp, pa);
+            sauron_army.push(sauron);
+            for (int i = 0; i < 3; i++){
+                // this_thread::sleep_for(chrono::milliseconds(300));
+                cout << "." << flush;
+            }
+            int num_Rei_Bruxo{}, num_Balrog{}, num_Orc{};
+            for (int j = 0; j < i - 1; j++){
+                int key = 0;
+                Soldado *sauron_soldier;
+                while (key == 0){
+                    key = 1;
+                    cout << endl
+                         << "Choose the race of the " << j + 1 << "th member of Sauron Army: " << endl;
+                    // this_thread::sleep_for(chrono::milliseconds(300));
+                    cout << "1 - Orc\n2 - Balrog\n3 - Rei Bruxo" << endl;
+                    int option;
+                    cin >> option;
+                    string nome;
+                    switch (option){
+                    case 1:
+                        num_Orc++;
+                        nome = "Orc" + to_string(num_Orc);
+                        sauron_soldier = new Orc(nome, hp, pa);
+                        break;
+                    case 2:
+                        if (num_Balrog == 2){
+                            cout << endl
+                                 << "We already have too many Balrog in the game, choose another race" << endl;
+                            key = 0;
+                            break;
+                        }
+                        num_Balrog++;
+                        nome = "Balrog" + to_string(num_Balrog);
+                        // sauron_soldier = new Balrog(nome,hp,pa);
+                        break;
+                    case 3:
+                        if (num_Rei_Bruxo == 2){
+                            cout << "We already have too many Rei Bruxo in the game, choose another race" << endl;
+                            for (int i = 0; i < 3; i++){
+                                // this_thread::sleep_for(chrono::milliseconds(300));
+                                cout << "." << flush;
+                            }
+                            key = 0;
+                            break;
+                        }
+                        num_Rei_Bruxo++;
+                        nome = "Rei Bruxo" + to_string(num_Rei_Bruxo);
+                        sauron_soldier = new ReiBruxo(nome, hp, pa);
+                        break;
+                    default:
+                        key = 0;
+                        cout << endl
+                             << "invalid option" << endl;
+                        break;
+                    }
+                }
+                sauron_army.push(sauron_soldier);
+            }
+            // this_thread::sleep_for(chrono::milliseconds(500));
+            return i;
+        }
 
-            } while (i <= 0);
+        int prelude_elf()
+        {
+            int i;
+            cout << endl
+                 << "Now, Decide How many characters would you like to have in elf army?" << endl;
+            cin >> i;
+            while (!i > 0)
+            {
+                cout << "The number must be positive! Let's try again" << flush;
+                for (int i = 0; i < 3; i++)
+                {
+                    // this_thread::sleep_for(chrono::milliseconds(300));
+                    cout << "." << flush;
+                }
+            }
+            int num_elf{}, num_anao{}, num_hum{}, num_emin{}, num_mago{};
+            for (int j = 0; j < i - 1; j++){
+                int key = 0;
+                Soldado *elf_soldier;
+                while (key == 0){
+                    key = 1;
+                    cout << endl
+                         << "Choose the race of the " << j << " member of Elf Army: " << endl;
+                    // this_thread::sleep_for(chrono::milliseconds(300));
+                    cout << "1 - Elfo\n2 - Anao\n3 - Humano\n4 - Eminence\n5 - Mago" << endl;
+                    int option;
+                    cin >> option;
+                    string nome;
+                    switch (option){
+                    case 1:
+                        num_elf++;
+                        nome = "Elfo" + to_string(num_elf);
+                        elf_soldier = new Elfo(nome, hp, pa);
+                        break;
+                    case 2:
+                        num_anao++;
+                        nome = "Anao" + to_string(num_anao);
+                        elf_soldier = new Anao(nome, hp, pa);
+                        break;
+                    case 3:
+                        if (num_emin == 1){
+                            cout << "We already have too many Eminence in the game, choose another race" << endl;
+                            for (int i = 0; i < 3; i++)
+                            {
+                                // this_thread::sleep_for(chrono::milliseconds(300));
+                                cout << "." << flush;
+                            }
+                            key = 0;
+                            break;
+                        }
+                        num_emin++;
+                        nome = "Eminence";
+                        elf_soldier = new Eminence(hp, pa);
+                        break;
+                    case 4:
+                        num_hum++;
+                        nome = "Humano" + to_string(num_hum);
+                        elf_soldier = new Humano(nome, hp, pa);
+                        break;
+                    case 5:
+                        num_mago++;
+                        nome = "Mago" + to_string(num_hum);
+                        elf_soldier = new Mago(nome, hp, pa);
+                        break;
+                    default:
+                        key = 0;
+                        cout << endl
+                             << "invalid option" << endl;
+                        break;
+                    }
+                }
+                sauron_army.push(elf_soldier);
+            }
+            // this_thread::sleep_for(chrono::milliseconds(500));
             return i;
         }
 
         void instantiate(){
-            int size = prelude();
-            sauron_army.clear();
-            elf_army.clear();
+            while (!sauron_army.empty())
+                sauron_army.pop();
+            while (!elf_army.empty())
+                elf_army.pop();
+            sauron_size = prelude_sauron();
+            elf_size = prelude_elf();
+            // Only one Witch King, Sauron and Eminence allowed
         }
 
+        void rodada(){
+            for (int i = 0; i < can_resurrect.size(); i++){
+                Soldado *soldado_resurrect = can_resurrect.front();
+                can_resurrect.pop();
+                // if(soldado_resurrect->has_revived()){
+                if(1){
+                    elf_army.push(soldado_resurrect);
+                }
+                else{
+                    can_resurrect.push(soldado_resurrect);
+                }
+            }
+            //
+            vector<Soldado *> elf_battle, sauron_battle;
+            for (int i = 0; i < min(elf_army.size(), sauron_battle.size()); i++){
+                elf_battle.push_back(elf_army.front());
+                elf_army.pop();
+                sauron_battle.push_back(sauron_army.front());
+                sauron_army.pop();
+            }
+            // embaralha os vetores
+            for (int i = 0; i < elf_battle.size(); i++){
+                elf_battle[i]->ataque(sauron_battle[i]);
+                sauron_battle[i]->ataque(elf_battle[i]);
+                if (sauron_battle[i]->is_alive())
+                    sauron_army.push(sauron_battle[i]);
+                if (elf_battle[i]->is_alive())
+                    elf_army.push(elf_battle[i]);
+            }
+        }
         void log(){
-
         }
 
         void run(){
-            // while(...){
-            //     rodada();
-            //     log();
-            // }
-            // final_results();
-            // end_game(); 
         }
 
         void final_results(){
-
         }
 
         void end_game(){
             char c;
-            cout << "Would you like to play again? (Y/N) ";
+            cout << "Would you like to play again? (Y/N) " << endl;
             cin >> c;
-            if(c != 'Y'){
+            if (c != 'Y'){
                 cout << "Alright. Bye!" << endl;
                 GAME_OVER = true;
-            } else{
+            }
+            else{
                 cout << "Alright! Restarting session" << flush;
-                for(int i=0; i< 3; i++){
-                    this_thread::sleep_for(chrono::milliseconds(300));
+                for (int i = 0; i < 3; i++){
+                    // this_thread::sleep_for(chrono::milliseconds(300));
                     cout << "." << flush;
                 }
-                this_thread::sleep_for(chrono::milliseconds(500));
+                // this_thread::sleep_for(chrono::milliseconds(500));
+                cout << endl;
                 instantiate();
             }
         }
 
-        bool over(){ return GAME_OVER;}
-
+        bool over() { return GAME_OVER; }
 };
-
-
 
 int main(){ 
     srand(time(NULL));

@@ -4,6 +4,8 @@
 #include <chrono>
 #include <vector>
 #include <algorithm>
+#include <random> // used for normal_distribution. NOTE: WORKS ONLY ON C++11 AND ABOVE
+
 
 using namespace std;
 
@@ -12,6 +14,8 @@ class Soldado{
     string nome;
     double poder_ataque;
     double saude;
+    
+    default_random_engine engine;
 
     protected:
         virtual void set_nome(string nome) { nome = nome; }
@@ -19,17 +23,53 @@ class Soldado{
         virtual void set_poder_ataque(double pa) { poder_ataque = pa; }
 
     public:
-        Soldado(string nome, double hp, double pa) : nome(nome), poder_ataque(pa), saude(hp) {}
+        Soldado(string nome, double hp, double pa) : nome(nome), poder_ataque(pa), saude(hp) {
+            engine.seed(time(NULL));
+        }
+        
         Soldado(const Soldado &other) = delete;
 
         virtual string get_nome() { return nome; }
+        
         virtual double get_poder_ataque() { return poder_ataque; }
+        
         virtual double get_saude() { return saude; }
-        virtual void defesa(double pa) { saude -= pa; }
-        virtual void true_damage(double pa) final { saude -= pa; }
-        virtual void ataque(Soldado *other) { other->defesa(this->get_poder_ataque()); }
+        
+        virtual void contra_ataque(Soldado* other){
+            cout << get_nome() << " dodges and throws a counter-attack!" << endl;
+            ataque(other);            
+        }
+
+        virtual void defesa(Soldado* other, double pa){
+            normal_distribution<double> dist(pa, pa/5);
+            double true_dmg = dist(engine);
+            if(true_dmg <= 0.4*pa){
+                contra_ataque(other);
+                return;
+            }
+            if(true_dmg >= 1.2*pa) cout << "It's super effective!" << endl;
+            saude -= true_dmg;
+        }
+        
+        virtual void true_damage(Soldado* other, double pa) final {
+            if(other->get_saude() <=0) return;
+            cout << get_nome() << " throws an attack!" << endl;
+            saude -= pa;
+        }
+        
+        virtual void ataque(Soldado *other) {
+            if(other-> get_saude() <=0) return;
+            other->defesa(this, this->get_poder_ataque());
+        }
+        
         virtual bool is_alive() { return saude > 0; }
+        
         virtual void resurrectio() {}
+        
+        virtual bool is_resurrected() {
+            return false;
+        } 
+
 };
 
 
@@ -77,13 +117,11 @@ class Humano: public Soldado{
 
 
 class Eminence: public Humano {
-    size_t WAR_MODE; // turns Shadow immune to damage and with double damage and attack speed for 3 rounds
+    size_t WAR_MODE; 
 
     public:
 
     Eminence(double hp, double pa) : Humano("Shadow", hp, pa), WAR_MODE(false) {}
-
-    ~Eminence() {}
 
     void I_AM_ATOMIC(Soldado* other){
         cout << "\x1B[3m\x1B[1mPlaytime is over\x1B[0m" << endl;
@@ -98,15 +136,17 @@ class Eminence: public Humano {
         this_thread::sleep_for(chrono::milliseconds(1000));
         cout << "\x1B[1mAM...\x1B[0m" << endl;
         this_thread::sleep_for(chrono::milliseconds(1500));
-        cout << "\x1B[3matomic\x1B[0m ";
-        other->true_damage(999999);
-        // this_thread::sleep_for(chrono::seconds(2));
-        // cout << "A great explosion takes place" << endl;
+        cout << "\x1B[3matomic\x1B[0m " << endl;
+        other->true_damage(other, 999999);
+        this_thread::sleep_for(chrono::seconds(2));
+        cout << "A great explosion takes place, with " << other->get_nome()<< " at its center" << endl;
+        this_thread::sleep_for(chrono::seconds(1));
+        cout << "The dust wears off, revealing " << other->get_nome()<< "'s corpse lying in the ground" << endl;
     }
 
-    void defesa(double pa) override {
+    void defesa(Soldado* other, double pa) override {
         if(WAR_MODE) return;
-        Soldado::defesa(pa/2);
+        Soldado::defesa(other, pa/2);
     } 
 
     void overdrive(){
@@ -116,9 +156,6 @@ class Eminence: public Humano {
         WAR_MODE = 3;
     }
 
-    void normal(){
-        // too lazy to implement
-    }
 
     void ataque(Soldado* other) override{
 
@@ -128,11 +165,11 @@ class Eminence: public Humano {
 
         if(WAR_MODE){
             WAR_MODE--;
-            other->true_damage(get_poder_ataque());
+            other->true_damage(other, get_poder_ataque());
             return;
         }
 
-        if(rand()%1000)
+        if(rand()%200)
             Humano::ataque(other);
         else{
             I_AM_ATOMIC(other);
@@ -152,9 +189,9 @@ class Balrog: public Soldado{
         Balrog(string nome, double hp, double pa): Soldado(nome, hp, pa), IS_BERSERK(false), original_hp(hp) {}
 
 
-        void defesa(double pa) override{
-            if(!IS_BERSERK) Soldado::defesa(pa);
-            else Soldado::defesa(pa/5);
+        void defesa(Soldado* other, double pa) override{
+            if(!IS_BERSERK) Soldado::defesa(other, pa);
+            else Soldado::defesa(other, pa/5);
             if(!IS_BERSERK && get_saude() < original_hp/5) berserk();
         }
 
@@ -180,10 +217,9 @@ class Sauron: public Soldado{
     public:
 
         Sauron(double hp, double pa) : Soldado("Sauron", 10 * hp, pa){}
+    
         Sauron(const Sauron &other) = delete;
-        
-        ~Sauron(){}
-        
+            
         void ataque(Soldado *other) {
             if(rand() % 10 <=2){
                 set_poder_ataque(2*get_poder_ataque());
@@ -198,8 +234,11 @@ class Sauron: public Soldado{
 
 class Orc: public Soldado{
     public:
+        
         Orc(string nome, double hp, double pa): Soldado(nome, hp, pa) {}
+        
         Orc(const Orc& other)= delete;
+        
         void ataque(Soldado *other) {
             if(rand() % 10 <= 1){
                 set_poder_ataque(1.1*get_poder_ataque());
@@ -212,9 +251,9 @@ class Orc: public Soldado{
 
 
 class Mago: public Soldado{
-    
-    bool revived;
-    double original_hp;
+    protected:
+        bool revived;
+        double original_hp;
 
     public:
         Mago(string nome, double hp, double pa) : Soldado(nome, hp, pa), revived(false), original_hp(hp) {}
@@ -228,9 +267,9 @@ class Mago: public Soldado{
             if(get_saude() <=0) return;
             
             int random_var = rand();
-            if (random_var % 25 == 0){
-                Soldado::defesa(this->get_poder_ataque());
-            }
+            if (random_var % 25 == 0)
+                true_damage(this, this->get_poder_ataque());
+                
             else if (random_var % 10 == 0){
                 set_poder_ataque(1.5*get_poder_ataque());
                 Soldado::ataque(other);
@@ -239,16 +278,26 @@ class Mago: public Soldado{
                 Soldado::ataque(other);
         }
 
-        void defesa(double pa) override {
+        void defesa(Soldado* other, double pa) override {
             if(revived)
                 set_saude(get_saude()-10);
-                Soldado::defesa(pa);
+                Soldado::defesa(other, pa);
         }
 
         void resurrectio() override{
-            // Ressucita o mago. Mago levará 10 de dano a cada rodada e terá 1.5 vezes o P.A.
-            set_poder_ataque(1.5*get_poder_ataque());
-        } // Declare in Soldado
+                cout << "\x1B[38;5;21mBlack lightning sparkles around " << get_nome() << "...\x1B[0m" << endl;
+                this_thread::sleep_for(chrono::milliseconds(1000));
+                cout << get_nome() << " raises from the ground, as if they've only been asleep." << endl;
+                cout << "Their skin, now pale white, confirms our suspicions..." << endl;
+                this_thread::sleep_for(chrono::milliseconds(1000));
+                cout << get_nome() << " has revived!" << endl;
+                set_poder_ataque(1.5 * get_poder_ataque());
+                revived = true;
+        } 
+
+        bool is_resurrected() override{
+            return revived;
+        }
 
 };
 
@@ -258,12 +307,12 @@ class ReiBruxo: public Mago{
         ReiBruxo(string name, double hp, double pa): Mago(name,hp,pa) {}
 
         void resurrectio() override{
-            // Ressucita o mago. Mago levará 10 de dano a cada rodada e terá 1.5 vezes o P.A.
-            set_poder_ataque(2*get_poder_ataque());
-        } // Declare in Soldado
+            Mago::resurrectio();
+            set_poder_ataque(get_poder_ataque()/1.5*2);
+        }
         
-        void defesa(double pa) override{
-            Soldado::defesa(pa);
+        void defesa(Soldado* other, double pa) override{
+            Soldado::defesa(other, pa);
         }
 };
 
@@ -312,7 +361,12 @@ class Menu{
         }
 
         void run(){
-
+            // while(...){
+            //     rodada();
+            //     log();
+            // }
+            // final_results();
+            // end_game(); 
         }
 
         void final_results(){
@@ -353,35 +407,25 @@ int main(){
     Soldado* a5 = new Balrog("ksdjhbgjwbdg", 100, 9);
     Soldado* a6 = new Mago("ksdjhbgjwbdg", 100, 9);
     Soldado* a7 = new ReiBruxo("ksdjhbgjwbdg", 100, 9);
-    Soldado* a8 = new Sauron(100, 9);
+    Soldado* a8 = new Sauron(10000, 9);
     Soldado* a9 = new Orc("ksdjhbgjwbdg", 100, 9);
 
-    for(int i=0; i<10; i++){
-        a8->ataque(a6);
-        a6->ataque(a8);
-    }
+    // for(int i=0; i<1000; i++){
 
+    //     // a8->ataque(a6);
+    //     a1->ataque(a8);
+    // }
+
+    a6->resurrectio();
 
     // cout << a1->get_saude() << endl;
     // cout << a2->get_saude() << endl;
     // cout << a3->get_saude() << endl;
     // cout << a4->get_saude() << endl;
     // cout << a5->get_saude() << endl;
-    cout << a6->get_saude() << endl;
+    cout << a1->get_saude() << endl;
     // cout << a7->get_saude() << endl;
     cout << a8->get_saude() << endl;
-    // cout << a9->get_saude() << endl;
-
-
-
-    // cout << a1->get_saude() << endl;
-    // cout << a2->get_saude() << endl;
-    // cout << a3->get_saude() << endl;
-    // cout << a4->get_saude() << endl;
-    // cout << a5->get_saude() << endl;
-    // cout << a6->get_saude() << endl;
-    // cout << a7->get_saude() << endl;
-    // cout << a8->get_saude() << endl;
     // cout << a9->get_saude() << endl;
 
 

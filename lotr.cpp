@@ -49,17 +49,21 @@ class Soldado{
                 return;
             }
             if(true_dmg >= 1.2*pa) cout << "It's super effective!" << endl;
+            this_thread::sleep_for(chrono::milliseconds(500));
             saude -= true_dmg;
         }
         
         virtual void true_damage(Soldado* other, double pa) final {
             if(other->get_saude() <=0) return;
-            cout << get_nome() << " throws an attack!" << endl;
+            cout << other->get_nome() << " throws an unavoidable attack!" << endl;
+            this_thread::sleep_for(chrono::milliseconds(500));
             saude -= pa;
         }
         
         virtual void ataque(Soldado *other) {
             if(other-> get_saude() <=0) return;
+            cout << get_nome() << " throws an attack!" << endl;
+            this_thread::sleep_for(chrono::milliseconds(500));
             other->defesa(this, this->get_poder_ataque());
         }
         

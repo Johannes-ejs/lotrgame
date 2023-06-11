@@ -1,0 +1,11 @@
+
+_____________________________________
+|Exercito      | Elfo    | Sauron    |
+|Nome          | Humano1 | Orc1      |
+|Raca          | Humano  | Orc       |
+|Dano dado     | 17      | 14        |
+|Dano Recebido | 12.1    | 15.123    |
+|Vivo          | Sim     | Nao       |
+_____________________________________
+
+Observações: Uso de setw para cetralizar os pipes

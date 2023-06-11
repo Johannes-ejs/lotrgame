@@ -8,4 +8,4 @@ _____________________________________
 |Vivo          | Sim     | Nao       |
 _____________________________________
 
-Observações: Uso de setw para cetralizar os pipes
+Observações: Uso de setw para cetralizar os pipes, limitar quantidade de caracteres no nome dos combatentes

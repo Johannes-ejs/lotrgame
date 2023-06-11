@@ -382,8 +382,9 @@ class Menu{
                     case 2:
                         if (num_Balrog == 2){
                             cout << endl
-                                 << "We already have too many Balrog in the game, choose another race" << endl;
+                                 << "We already have too many Balrog in the game, choose another race" << flush;
                             key = 0;
+                            cout << '\n';
                             break;
                         }
                         num_Balrog++;
@@ -392,11 +393,12 @@ class Menu{
                         break;
                     case 3:
                         if (num_Rei_Bruxo == 2){
-                            cout << "We already have too many Rei Bruxo in the game, choose another race" << endl;
+                            cout << "We already have too many Rei Bruxo in the game, choose another race" << flush;
                             for (int i = 0; i < 3; i++){
                                 // this_thread::sleep_for(chrono::milliseconds(300));
                                 cout << "." << flush;
                             }
+                            cout << '\n';
                             key = 0;
                             break;
                         }
@@ -458,12 +460,13 @@ class Menu{
                         break;
                     case 3:
                         if (num_emin == 1){
-                            cout << "We already have too many Eminence in the game, choose another race" << endl;
+                            cout << "We already have too many Eminence in Shadows in the game, choose another race" << flush;
                             for (int i = 0; i < 3; i++)
                             {
                                 // this_thread::sleep_for(chrono::milliseconds(300));
                                 cout << "." << flush;
                             }
+                            cout << '\n';
                             key = 0;
                             break;
                         }
@@ -488,7 +491,7 @@ class Menu{
                         break;
                     }
                 }
-                sauron_army.push(elf_soldier);
+                elf_army.push(elf_soldier);
             }
             // this_thread::sleep_for(chrono::milliseconds(500));
             return i;
@@ -538,9 +541,18 @@ class Menu{
         }
 
         void run(){
+            while(!GAME_OVER){
+                rodada();
+                log();
+            }
+            final_results();
         }
 
         void final_results(){
+            cout << "GAME OVER! The winner is fulano!" << endl;
+            cout << "The survivors are: ..." << endl;
+
+            end_game();
         }
 
         void end_game(){
@@ -549,9 +561,9 @@ class Menu{
             cin >> c;
             if (c != 'Y'){
                 cout << "Alright. Bye!" << endl;
-                GAME_OVER = true;
             }
             else{
+                GAME_OVER = false;
                 cout << "Alright! Restarting session" << flush;
                 for (int i = 0; i < 3; i++){
                     // this_thread::sleep_for(chrono::milliseconds(300));

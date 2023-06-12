@@ -540,9 +540,9 @@ class Menu{
             }
         }
         void log(){
-            // cout << right <<setw(15) << "presumo";
-            // cout << setfill('\0');
-            // cout << endl << "que funciona";
+            cout << right <<setw(15) << "presumo";
+            cout << setfill('\0');
+            cout << endl << "que funciona";
             // cout << resetiosflags(ios_base::);
         }
 

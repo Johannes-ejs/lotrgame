@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <random> // used for normal_distribution. NOTE: WORKS ONLY ON C++11 AND ABOVE
 #include <queue>
+#include <iomanip>
 
 
 using namespace std;
@@ -353,11 +354,11 @@ class Menu{
                     cout << "." << flush;
                 }
             }
-            cout << "Sauron is in the army, so you need to choose the race of his soldiers" << endl;
+            cout << "Sauron is in the army, so you need to choose the race of his soldiers" << flush;
             Soldado *sauron = new Sauron(hp, pa);
             sauron_army.push(sauron);
             for (int i = 0; i < 3; i++){
-                // this_thread::sleep_for(chrono::milliseconds(300));
+                this_thread::sleep_for(chrono::milliseconds(300));
                 cout << "." << flush;
             }
             int num_Rei_Bruxo{}, num_Balrog{}, num_Orc{};
@@ -435,13 +436,13 @@ class Menu{
                 }
             }
             int num_elf{}, num_anao{}, num_hum{}, num_emin{}, num_mago{};
-            for (int j = 0; j < i - 1; j++){
+            for (int j = 0; j < i; j++){
                 int key = 0;
                 Soldado *elf_soldier;
                 while (key == 0){
                     key = 1;
                     cout << endl
-                         << "Choose the race of the " << j << " member of Elf Army: " << endl;
+                         << "Choose the race of the " << j + 1 << "th member of Elf Army: " << endl;
                     // this_thread::sleep_for(chrono::milliseconds(300));
                     cout << "1 - Elfo\n2 - Anao\n3 - Humano\n4 - Eminence\n5 - Mago" << endl;
                     int option;
@@ -458,7 +459,7 @@ class Menu{
                         nome = "Anao" + to_string(num_anao);
                         elf_soldier = new Anao(nome, hp, pa);
                         break;
-                    case 3:
+                    case 4:
                         if (num_emin == 1){
                             cout << "We already have too many Eminence in Shadows in the game, choose another race" << flush;
                             for (int i = 0; i < 3; i++)
@@ -471,10 +472,11 @@ class Menu{
                             break;
                         }
                         num_emin++;
+                        cout << num_emin;
                         nome = "Eminence";
                         elf_soldier = new Eminence(hp, pa);
                         break;
-                    case 4:
+                    case 3:
                         num_hum++;
                         nome = "Humano" + to_string(num_hum);
                         elf_soldier = new Humano(nome, hp, pa);
@@ -538,6 +540,10 @@ class Menu{
             }
         }
         void log(){
+            cout << right <<setw(15) << "presumo";
+            cout << setfill('\0');
+            cout << endl << "que funciona";
+            // cout << resetiosflags(ios_base::);
         }
 
         void run(){
@@ -578,52 +584,10 @@ class Menu{
         bool over() { return GAME_OVER; }
 };
 
-int main(){ 
-    srand(time(NULL));
-
-    Soldado* a1 = new Elfo("ksdjhbgjwbdg", 100, 9);
-    Soldado* a2 = new Anao("ksdjhbgjwbdg", 100, 9);
-    Soldado* a3 = new Humano("ksdjhbgjwbdg", 100, 9);
-    Soldado* a4 = new Eminence(100, 9);
-    Soldado* a5 = new Balrog("ksdjhbgjwbdg", 100, 9);
-    Soldado* a6 = new Mago("ksdjhbgjwbdg", 100, 9);
-    Soldado* a7 = new ReiBruxo("ksdjhbgjwbdg", 100, 9);
-    Soldado* a8 = new Sauron(10000, 9);
-    Soldado* a9 = new Orc("ksdjhbgjwbdg", 100, 9);
-
-    // for(int i=0; i<1000; i++){
-
-    //     // a8->ataque(a6);
-    //     a1->ataque(a8);
-    // }
-
-    a6->resurrectio();
-
-    // cout << a1->get_saude() << endl;
-    // cout << a2->get_saude() << endl;
-    // cout << a3->get_saude() << endl;
-    // cout << a4->get_saude() << endl;
-    // cout << a5->get_saude() << endl;
-    cout << a1->get_saude() << endl;
-    // cout << a7->get_saude() << endl;
-    cout << a8->get_saude() << endl;
-    // cout << a9->get_saude() << endl;
-
-
-
-
-    delete a1;
-    delete a2;
-    delete a3;
-    delete a4;
-    delete a5;
-    delete a6;
-    delete a7;
-    delete a8;
-    delete a9;
-
-    // Menu game;
+int main(){
+    Menu game(10, 100);
+    game.log();
     // do{
     //     game.run();
-    // } while(!game.over())    
+    // } while (!game.over());      
 }

@@ -44,27 +44,27 @@ class Soldado{
 
         virtual void defesa(Soldado* other, double pa){
             normal_distribution<double> dist(pa, pa/5);
-            double true_dmg = dist(engine);
+            double true_dmg = round(dist(engine)*100.0)/100.0;
             if(true_dmg <= 0.4*pa){
                 contra_ataque(other);
                 return;
             }
             if(true_dmg >= 1.2*pa) cout << "It's super effective!" << endl;
-            this_thread::sleep_for(chrono::milliseconds(500));
+            // this_thread::sleep_for(chrono::milliseconds(500));
             saude -= true_dmg;
         }
         
         virtual void true_damage(Soldado* other, double pa) final {
             if(other->get_saude() <=0) return;
             cout << other->get_nome() << " throws an unavoidable attack!" << endl;
-            this_thread::sleep_for(chrono::milliseconds(500));
+            // this_thread::sleep_for(chrono::milliseconds(500));
             saude -= pa;
         }
         
         virtual void ataque(Soldado *other) {
             if(other-> get_saude() <=0) return;
             cout << get_nome() << " throws an attack!" << endl;
-            this_thread::sleep_for(chrono::milliseconds(500));
+            // this_thread::sleep_for(chrono::milliseconds(500));
             other->defesa(this, this->get_poder_ataque());
         }
         
@@ -129,26 +129,26 @@ class Eminence: public Humano {
 
     Eminence(double hp, double pa) : Humano("Shadow", hp, pa), WAR_MODE(false) {}
 
-    void I_AM_ATOMIC(Soldado* other){
-        cout << "\x1B[3m\x1B[1mPlaytime is over\x1B[0m" << endl;
-        this_thread::sleep_for(chrono::seconds(1));
-        cout << "The area is filled with a bluish magic" << endl;
-        this_thread::sleep_for(chrono::milliseconds(1500));
-        cout << "Allies and foes alike all stopped battling, and silently, fearfully stared at the source of the great magic" << endl;
-        this_thread::sleep_for(chrono::milliseconds(2500));
-        cout << "Let the true meaning of almighty be carved in your soul..." << endl;
-        this_thread::sleep_for(chrono::milliseconds(1500));
-        cout << "I..." << endl;
-        this_thread::sleep_for(chrono::milliseconds(1000));
-        cout << "\x1B[1mAM...\x1B[0m" << endl;
-        this_thread::sleep_for(chrono::milliseconds(1500));
-        cout << "\x1B[3matomic\x1B[0m " << endl;
-        other->true_damage(other, 999999);
-        this_thread::sleep_for(chrono::seconds(2));
-        cout << "A great explosion takes place, with " << other->get_nome()<< " at its center" << endl;
-        this_thread::sleep_for(chrono::seconds(1));
-        cout << "The dust wears off, revealing " << other->get_nome()<< "'s corpse lying in the ground" << endl;
-    }
+    // void I_AM_ATOMIC(Soldado* other){
+    //     cout << "\x1B[3m\x1B[1mPlaytime is over\x1B[0m" << endl;
+    //     this_thread::sleep_for(chrono::seconds(1));
+    //     cout << "The area is filled with a bluish magic" << endl;
+    //     this_thread::sleep_for(chrono::milliseconds(1500));
+    //     cout << "Allies and foes alike all stopped battling, and silently, fearfully stared at the source of the great magic" << endl;
+    //     this_thread::sleep_for(chrono::milliseconds(2500));
+    //     cout << "Let the true meaning of almighty be carved in your soul..." << endl;
+    //     this_thread::sleep_for(chrono::milliseconds(1500));
+    //     cout << "I..." << endl;
+    //     this_thread::sleep_for(chrono::milliseconds(1000));
+    //     cout << "\x1B[1mAM...\x1B[0m" << endl;
+    //     this_thread::sleep_for(chrono::milliseconds(1500));
+    //     cout << "\x1B[3matomic\x1B[0m " << endl;
+    //     other->true_damage(other, 999999);
+    //     this_thread::sleep_for(chrono::seconds(2));
+    //     cout << "A great explosion takes place, with " << other->get_nome()<< " at its center" << endl;
+    //     this_thread::sleep_for(chrono::seconds(1));
+    //     cout << "The dust wears off, revealing " << other->get_nome()<< "'s corpse lying in the ground" << endl;
+    // }
 
     void defesa(Soldado* other, double pa) override {
         if(WAR_MODE) return;
@@ -157,7 +157,7 @@ class Eminence: public Humano {
 
     void overdrive(){
         cout << "Now... " << flush; 
-        this_thread::sleep_for(chrono::milliseconds(700));
+        // this_thread::sleep_for(chrono::milliseconds(700));
         cout << "\x1B[1mI am a little motivated\x1B[0m" << endl;
         WAR_MODE = 3;
     }
@@ -178,7 +178,7 @@ class Eminence: public Humano {
         if(rand()%200)
             Humano::ataque(other);
         else{
-            I_AM_ATOMIC(other);
+            // I_AM_ATOMIC(other);
         }
     
     }
@@ -203,7 +203,7 @@ class Balrog: public Soldado{
 
         void berserk(){
             cout << "\x1B[3mThe air is getting warmer around " << get_nome() << "..." <<"\x1B[0m" << endl;
-            this_thread::sleep_for(chrono::milliseconds(700));
+            // this_thread::sleep_for(chrono::milliseconds(700));
             IS_BERSERK = true;
             set_poder_ataque(1.25*get_poder_ataque());
         }
@@ -292,10 +292,10 @@ class Mago: public Soldado{
 
         void resurrectio() override{
                 cout << "\x1B[38;5;21mBlack lightning sparkles around " << get_nome() << "...\x1B[0m" << endl;
-                this_thread::sleep_for(chrono::milliseconds(1000));
+                // this_thread::sleep_for(chrono::milliseconds(1000));
                 cout << get_nome() << " raises from the ground, as if they've only been asleep." << endl;
                 cout << "Their skin, now pale white, confirms our suspicions..." << endl;
-                this_thread::sleep_for(chrono::milliseconds(1000));
+                // this_thread::sleep_for(chrono::milliseconds(1000));
                 cout << get_nome() << " has revived!" << endl;
                 set_poder_ataque(1.5 * get_poder_ataque());
                 revived = true;
@@ -350,7 +350,7 @@ class Menu{
             while (!i > 0){
                 cout << "The number must be positive! Let's try again" << flush;
                 for (int i = 0; i < 3; i++){
-                    this_thread::sleep_for(chrono::milliseconds(300));
+                    // this_thread::sleep_for(chrono::milliseconds(300));
                     cout << "." << flush;
                 }
             }
@@ -358,7 +358,7 @@ class Menu{
             Soldado *sauron = new Sauron(hp, pa);
             sauron_army.push(sauron);
             for (int i = 0; i < 3; i++){
-                this_thread::sleep_for(chrono::milliseconds(300));
+                // this_thread::sleep_for(chrono::milliseconds(300));
                 cout << "." << flush;
             }
             int num_Rei_Bruxo{}, num_Balrog{}, num_Orc{};
@@ -510,6 +510,7 @@ class Menu{
         }
 
         void rodada(){
+            cout<<"--"<<endl;
             for (int i = 0; i < can_resurrect.size(); i++){
                 Soldado *soldado_resurrect = can_resurrect.front();
                 can_resurrect.pop();
@@ -521,35 +522,55 @@ class Menu{
                     can_resurrect.push(soldado_resurrect);
                 }
             }
-            //
+            cout<<"++"<<endl;
             vector<Soldado *> elf_battle, sauron_battle;
-            for (int i = 0; i < min(elf_army.size(), sauron_battle.size()); i++){
+            for (int i = 0; i < min(elf_army.size(), sauron_army.size()); i++){
+                cout<<i<<endl;
                 elf_battle.push_back(elf_army.front());
                 elf_army.pop();
                 sauron_battle.push_back(sauron_army.front());
                 sauron_army.pop();
             }
-            // embaralha os vetores
+            random_shuffle(elf_battle.begin(),elf_battle.end());
+            random_shuffle(sauron_battle.begin(),sauron_battle.end());
+            int elf_live0,sauron_live0;
             for (int i = 0; i < elf_battle.size(); i++){
-                elf_battle[i]->ataque(sauron_battle[i]);
-                sauron_battle[i]->ataque(elf_battle[i]);
+                elf_live0=elf_battle[i]->get_saude();
+                sauron_live0=sauron_battle[i]->get_saude();
+                if(rand()%2){
+                    elf_battle[i]->ataque(sauron_battle[i]);
+                    sauron_battle[i]->ataque(elf_battle[i]);
+                }
+                else{
+                    sauron_battle[i]->ataque(elf_battle[i]);
+                    elf_battle[i]->ataque(sauron_battle[i]);
+                }
                 if (sauron_battle[i]->is_alive())
                     sauron_army.push(sauron_battle[i]);
                 if (elf_battle[i]->is_alive())
                     elf_army.push(elf_battle[i]);
+                log(elf_live0,elf_battle[i],sauron_live0,sauron_battle[i]);
             }
+
         }
-        void log(){
-            cout << right <<setw(15) << "presumo";
-            cout << setfill('\0');
-            cout << endl << "que funciona";
-            // cout << resetiosflags(ios_base::);
+        void log(float elf_live0,Soldado *elf_soldier,float sauron_live0,Soldado *sauron_soldier){
+            string elf_live,sauron_live;
+            elf_soldier->is_alive()?elf_live="Sim":elf_live="Nao";
+            sauron_soldier->is_alive()?sauron_live="Sim":sauron_live="Nao";
+            cout<<"_____________________________________"<<endl;
+            cout << left <<setw(15) << "|Exercito"<<setw(10)<<"| Elfo"<<setw(12)<<"| Sauron  "<<"|"<<endl;
+            cout << left <<setw(15) << "|Nome"<<setw(10)<<"|"+elf_soldier->get_nome()<<setw(12)<<"|"+sauron_soldier->get_nome()<<"|"<<endl;
+            // cout << left <<setw(15) << "|Raca "<<setw(10)<<"|"+elf_soldier->get_nome()<<setw(12)<<"|"+sauron_soldier->get_nome()<<"|"<<endl;
+            cout << left <<setw(15) << "|Dano Recebido"<<"|"<<setw(9)<<(elf_live0-elf_soldier->get_saude())<<"|"<<setw(11)<<(sauron_live0-sauron_soldier->get_saude())<<"|"<<endl;
+            cout << left <<setw(15) << "|Vivo"<<setw(10)<<"|"+elf_live<<setw(12)<<"|"+sauron_live<<"|"<<endl; 
+            cout<<"|______________|_________|___________|"<<endl;
+            cout<<elf_soldier->get_saude()<<"\n"<<elf_live0<<endl;
         }
 
         void run(){
             while(!GAME_OVER){
                 rodada();
-                log();
+                // log();
             }
             final_results();
         }
@@ -585,8 +606,9 @@ class Menu{
 };
 
 int main(){
-    Menu game(10, 100);
-    game.log();
+    Menu game(100, 100);
+    game.rodada();
+    // game.log();
     // do{
     //     game.run();
     // } while (!game.over());      

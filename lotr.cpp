@@ -11,7 +11,7 @@
 
 using namespace std;
 
-default_random_engine default_generator;
+
 
 class Soldado{
     string nome;
@@ -28,8 +28,8 @@ class Soldado{
         virtual void set_is_mage(bool flag) { IS_MAGE = flag; }
 
     public:
-        Soldado(string nome, double hp, double pa) : nome(nome), poder_ataque(pa), saude(hp), IS_MAGE(false), engine(default_generator) {
-            engine.seed(time(NULL));
+        Soldado(string nome, double hp, double pa) : nome(nome), poder_ataque(pa), saude(hp), IS_MAGE(false){
+            engine.seed(chrono::system_clock::now().time_since_epoch().count());
         }
         
         Soldado(const Soldado &other) = delete;

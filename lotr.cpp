@@ -16,6 +16,7 @@ class Soldado{
     string nome;
     double poder_ataque;
     double saude;
+    bool IS_MAGE;
     
     default_random_engine engine;
 
@@ -23,9 +24,10 @@ class Soldado{
         virtual void set_nome(string nome) { nome = nome; }
         virtual void set_saude(double saude) { saude = saude; }
         virtual void set_poder_ataque(double pa) { poder_ataque = pa; }
+        virtual void set_is_mage(bool flag) { IS_MAGE = flag; }
 
     public:
-        Soldado(string nome, double hp, double pa) : nome(nome), poder_ataque(pa), saude(hp) {
+        Soldado(string nome, double hp, double pa) : nome(nome), poder_ataque(pa), saude(hp), IS_MAGE(false) {
             engine.seed(time(NULL));
         }
         
@@ -75,6 +77,10 @@ class Soldado{
         virtual bool is_resurrected() {
             return false;
         } 
+
+        virtual bool is_evil() {return false; throw runtime_error("this method was not supposed to be called");}
+
+        virtual bool is_mage() {return IS_MAGE;}
 
 };
 
@@ -263,7 +269,10 @@ class Mago: public Soldado{
         double original_hp;
 
     public:
-        Mago(string nome, double hp, double pa) : Soldado(nome, hp, pa), revived(false), original_hp(hp) {}
+        Mago(string nome, double hp, double pa) : Soldado(nome, hp, pa), revived(false), original_hp(hp) {
+            set_is_mage(true);
+        }
+
         Mago(const Mago& other)= delete;
 
         void ataque(Soldado *other) {
@@ -306,6 +315,10 @@ class Mago: public Soldado{
             return revived;
         }
 
+        bool is_evil() override{
+            return false;
+        }
+
 };
 
 
@@ -321,6 +334,11 @@ class ReiBruxo: public Mago{
         void defesa(Soldado* other, double pa) override{
             Soldado::defesa(other, pa);
         }
+
+        bool is_evil() override{
+            return true;
+        }
+
 };
 
 class Menu{
@@ -520,9 +538,12 @@ class Menu{
             for (int i = 0; i < can_resurrect.size(); i++){
                 Soldado *soldado_resurrect = can_resurrect.front();
                 can_resurrect.pop();
-                // if(soldado_resurrect->has_revived()){
-                if(1){
-                    elf_army.push(soldado_resurrect);
+                if(rand()%50==0){
+                    soldado_resurrect->resurrectio();
+                    if(soldado_resurrect->is_evil())
+                        sauron_army.push(soldado_resurrect);
+                    else
+                        elf_army.push(soldado_resurrect);
                 }
                 else{
                     can_resurrect.push(soldado_resurrect);
@@ -556,9 +577,13 @@ class Menu{
                     sauron_battle[i]->ataque(elf_battle[i]);
                     if(elf_battle[i]->is_alive())elf_battle[i]->ataque(sauron_battle[i]);
                 }
+                if (!sauron_battle[i]->is_alive() && sauron_battle[i]->is_mage())
+                    can_resurrect.push(sauron_battle[i]);    
+                if (!elf_battle[i]->is_alive() && elf_battle[i]->is_mage())
+                    can_resurrect.push(elf_battle[i]);
                 if (sauron_battle[i]->is_alive())
                     sauron_army.push(sauron_battle[i]);
-                if (elf_battle[i]->is_alive())
+                if ((!elf_battle[i]->is_alive() && elf_battle[i]->is_mage()) || elf_battle[i]->is_alive())
                     elf_army.push(elf_battle[i]);
                 log(elf_live0,elf_battle[i],sauron_live0,sauron_battle[i]);
             }
@@ -621,6 +646,30 @@ class Menu{
 int main(){
     char c;
     Menu game(100, 100);
+    game.rodada();
+    scanf("%c",&c);
+    game.rodada();
+    scanf("%c",&c);
+    game.rodada();
+    scanf("%c",&c);
+    game.rodada();
+    scanf("%c",&c);
+    game.rodada();
+    scanf("%c",&c);
+    game.rodada();
+    scanf("%c",&c);
+    game.rodada();
+    scanf("%c",&c);
+    game.rodada();
+    scanf("%c",&c);
+    game.rodada();
+    scanf("%c",&c);
+    game.rodada();
+    scanf("%c",&c);
+    game.rodada();
+    scanf("%c",&c);
+    game.rodada();
+    scanf("%c",&c);
     game.rodada();
     scanf("%c",&c);
     game.rodada();

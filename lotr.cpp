@@ -11,6 +11,7 @@
 
 using namespace std;
 
+default_random_engine default_generator;
 
 class Soldado{
     string nome;
@@ -27,7 +28,7 @@ class Soldado{
         virtual void set_is_mage(bool flag) { IS_MAGE = flag; }
 
     public:
-        Soldado(string nome, double hp, double pa) : nome(nome), poder_ataque(pa), saude(hp), IS_MAGE(false) {
+        Soldado(string nome, double hp, double pa) : nome(nome), poder_ataque(pa), saude(hp), IS_MAGE(false), engine(default_generator) {
             engine.seed(time(NULL));
         }
         
@@ -642,6 +643,8 @@ class Menu{
 
         bool over() { return GAME_OVER; }
 };
+
+
 
 int main(){
     char c;

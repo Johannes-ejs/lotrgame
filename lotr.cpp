@@ -524,12 +524,6 @@ class Menu{
         }
 
         void instantiate(){
-            while (!sauron_army.empty())
-                sauron_army.pop();
-            while (!elf_army.empty())
-                elf_army.pop();
-            while(!can_resurrect.empty())
-                can_resurrect.pop();
             rodada_index=1;
             GAME_OVER = winner::none;
             sauron_size = prelude_sauron();
@@ -545,8 +539,7 @@ class Menu{
             for (int i = 0; i < can_resurrect.size(); i++){
                 Soldado *soldado_resurrect = can_resurrect.front();
                 can_resurrect.pop();
-                if(1){
-                // if(rand()%50==0){
+                if(rand()%10==0){
                     soldado_resurrect->resurrectio();
                     if(soldado_resurrect->is_evil())
                         sauron_army.push(soldado_resurrect);
@@ -585,15 +578,23 @@ class Menu{
                     sauron_battle[i]->ataque(elf_battle[i]);
                     if(elf_battle[i]->is_alive())elf_battle[i]->ataque(sauron_battle[i]);
                 }
+                log(elf_live0,elf_battle[i],sauron_live0,sauron_battle[i]);
+
                 if (!sauron_battle[i]->is_alive() && sauron_battle[i]->is_mage() && !sauron_battle[i]->is_resurrected())
                     can_resurrect.push(sauron_battle[i]);    
+                else if (sauron_battle[i]->is_alive())
+                    sauron_army.push(sauron_battle[i]);
+                else{
+                    delete sauron_battle[i];
+                }
+
                 if (!elf_battle[i]->is_alive() && elf_battle[i]->is_mage() && !elf_battle[i]->is_resurrected())
                     can_resurrect.push(elf_battle[i]);
-                if (sauron_battle[i]->is_alive())
-                    sauron_army.push(sauron_battle[i]);
-                if ((!elf_battle[i]->is_alive() && elf_battle[i]->is_mage()) || elf_battle[i]->is_alive())
+                else if ( elf_battle[i]->is_alive())
                     elf_army.push(elf_battle[i]);
-                log(elf_live0,elf_battle[i],sauron_live0,sauron_battle[i]);
+                else{
+                    delete elf_battle[i];
+                }
             }
             if(sauron_army.empty()) GAME_OVER=winner::elfo;
             if(elf_army.empty()) GAME_OVER=winner::sauron;
@@ -613,8 +614,6 @@ class Menu{
             cout<<"|______________|_________|___________|"<<endl;
         }
 
-        // void print_elf_army
-
         void run(){
             char c;
             fflush(stdin);
@@ -626,13 +625,14 @@ class Menu{
         }
 
         void final_results(){
-            cout << "GAME OVER! The winner is ";
+            cout <<"\x1B[32mGAME OVER!\x1B[0m"<<endl<<"The winner is ";
             if(GAME_OVER==winner::sauron){
                 cout<<"Sauron army !"<<endl<<endl;;
                 cout << "The survivors are: ..." << endl;
                 while(!sauron_army.empty()){
-                    string name=(sauron_army.front())->get_nome(); sauron_army.pop();
-                    cout<<name<<endl;
+                    Soldado* soldier=(sauron_army.front()); sauron_army.pop();
+                    cout<<soldier->get_nome()<<endl;
+                    delete soldier;
                 }
                 cout<<endl;
             }
@@ -640,15 +640,34 @@ class Menu{
                 cout<<"Elf army !"<<endl<<endl;
                 cout << "The survivors are: ..." << endl;
                 while(!elf_army.empty()){
-                    string name=(elf_army.front())->get_nome(); elf_army.pop();
-                    cout<<name<<endl;
+                    Soldado* soldier=(elf_army.front()); elf_army.pop();
+                    cout<<soldier->get_nome()<<endl;
+                    delete soldier;
                 }
                 cout<<endl;
             }
             end_game();
         }
+        void delete_game(){
+            while (!sauron_army.empty()){
+                Soldado *soldier=sauron_army.front();
+                sauron_army.pop();
+                delete soldier;
+            }
+            while (!elf_army.empty()){
+                Soldado *soldier=sauron_army.front();
+                elf_army.pop();
+                delete soldier;
+            }
+            while(!can_resurrect.empty()){
+                Soldado *soldier=can_resurrect.front();
+                can_resurrect.pop();
+                delete soldier;
+            }
+        }
 
         void end_game(){
+            delete_game();
             char c;
             cout << "Would you like to play again? (Y/N) " << endl;
             cin >> c;
@@ -679,6 +698,6 @@ int main(){
     do{
         game.run();
         getchar();
-    } while (!game.over());      
+    } while (!game.over());  
 // game.log();
 }

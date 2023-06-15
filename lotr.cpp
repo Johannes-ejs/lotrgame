@@ -539,7 +539,8 @@ class Menu{
             for (int i = 0; i < can_resurrect.size(); i++){
                 Soldado *soldado_resurrect = can_resurrect.front();
                 can_resurrect.pop();
-                if(rand()%50==0){
+                if(1){
+                // if(rand()%50==0){
                     soldado_resurrect->resurrectio();
                     if(soldado_resurrect->is_evil())
                         sauron_army.push(soldado_resurrect);
@@ -578,9 +579,9 @@ class Menu{
                     sauron_battle[i]->ataque(elf_battle[i]);
                     if(elf_battle[i]->is_alive())elf_battle[i]->ataque(sauron_battle[i]);
                 }
-                if (!sauron_battle[i]->is_alive() && sauron_battle[i]->is_mage())
+                if (!sauron_battle[i]->is_alive() && sauron_battle[i]->is_mage() && !sauron_battle[i]->is_resurrected())
                     can_resurrect.push(sauron_battle[i]);    
-                if (!elf_battle[i]->is_alive() && elf_battle[i]->is_mage())
+                if (!elf_battle[i]->is_alive() && elf_battle[i]->is_mage() && !elf_battle[i]->is_resurrected())
                     can_resurrect.push(elf_battle[i]);
                 if (sauron_battle[i]->is_alive())
                     sauron_army.push(sauron_battle[i]);

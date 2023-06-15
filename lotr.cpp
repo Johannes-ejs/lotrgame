@@ -198,8 +198,9 @@ class Balrog: public Soldado{
         void defesa(Soldado* other, double pa) override{
             if(!IS_BERSERK) Soldado::defesa(other, pa);
             else Soldado::defesa(other, pa/5);
-            if(!IS_BERSERK && get_saude() < original_hp/5) berserk();
+            if(!IS_BERSERK && get_saude() < original_hp/5 && get_saude()>0) berserk();
         }
+
 
         void berserk(){
             cout << "\x1B[3mThe air is getting warmer around " << get_nome() << "..." <<"\x1B[0m" << endl;
@@ -340,6 +341,7 @@ class Menu{
             instantiate();
         }
 
+
         Menu(const Menu &other) = delete;
 
         int prelude_sauron(){
@@ -390,7 +392,7 @@ class Menu{
                         }
                         num_Balrog++;
                         nome = "Balrog" + to_string(num_Balrog);
-                        // sauron_soldier = new Balrog(nome,hp,pa);
+                        sauron_soldier = new Balrog(nome,hp,pa);
                         break;
                     case 3:
                         if (num_Rei_Bruxo == 2){
@@ -510,7 +512,11 @@ class Menu{
         }
 
         void rodada(){
-            cout<<"--"<<endl;
+            static int index=1;
+            cout<<endl<<endl<<"--------------------------------------"<<endl;
+            if(index<10) cout<<"-------------- RODADA "<<index++<<" --------------"<<endl;
+            else cout<<"-------------- RODADA "<<index++<<" -------------"<<endl;
+            cout<<"--------------------------------------"<<endl<<endl;
             for (int i = 0; i < can_resurrect.size(); i++){
                 Soldado *soldado_resurrect = can_resurrect.front();
                 can_resurrect.pop();
@@ -522,10 +528,9 @@ class Menu{
                     can_resurrect.push(soldado_resurrect);
                 }
             }
-            cout<<"++"<<endl;
             vector<Soldado *> elf_battle, sauron_battle;
-            for (int i = 0; i < min(elf_army.size(), sauron_army.size()); i++){
-                cout<<i<<endl;
+            int minimo=min(elf_army.size(), sauron_army.size());
+            for (int i = 0; i < minimo; i++){
                 elf_battle.push_back(elf_army.front());
                 elf_army.pop();
                 sauron_battle.push_back(sauron_army.front());
@@ -533,17 +538,23 @@ class Menu{
             }
             random_shuffle(elf_battle.begin(),elf_battle.end());
             random_shuffle(sauron_battle.begin(),sauron_battle.end());
-            int elf_live0,sauron_live0;
-            for (int i = 0; i < elf_battle.size(); i++){
+            cout<<"The opponents of this round are:"<<endl;
+            for(int i=0;i<minimo;i++){
+                cout<<elf_battle[i]->get_nome()<<" vs "<<sauron_battle[i]->get_nome()<<endl;
+            }
+            float elf_live0,sauron_live0;
+            for (int i = 0; i < minimo; i++){
+                cout<<endl<<endl<<"-------------------------------------";
+                cout<<endl<<endl<<elf_battle[i]->get_nome()<<" vs "<<sauron_battle[i]->get_nome()<<" :"<<endl<<endl<<endl;
                 elf_live0=elf_battle[i]->get_saude();
                 sauron_live0=sauron_battle[i]->get_saude();
                 if(rand()%2){
                     elf_battle[i]->ataque(sauron_battle[i]);
-                    sauron_battle[i]->ataque(elf_battle[i]);
+                    if(sauron_battle[i]->is_alive()) sauron_battle[i]->ataque(elf_battle[i]);
                 }
                 else{
                     sauron_battle[i]->ataque(elf_battle[i]);
-                    elf_battle[i]->ataque(sauron_battle[i]);
+                    if(elf_battle[i]->is_alive())elf_battle[i]->ataque(sauron_battle[i]);
                 }
                 if (sauron_battle[i]->is_alive())
                     sauron_army.push(sauron_battle[i]);
@@ -551,21 +562,23 @@ class Menu{
                     elf_army.push(elf_battle[i]);
                 log(elf_live0,elf_battle[i],sauron_live0,sauron_battle[i]);
             }
-
         }
         void log(float elf_live0,Soldado *elf_soldier,float sauron_live0,Soldado *sauron_soldier){
             string elf_live,sauron_live;
             elf_soldier->is_alive()?elf_live="Sim":elf_live="Nao";
             sauron_soldier->is_alive()?sauron_live="Sim":sauron_live="Nao";
+            // cout<<endl<<endl<<"--------------RESULTADO--------------"<<endl;
+            cout<<endl<<endl<<"              RESULTADO"<<endl;
             cout<<"_____________________________________"<<endl;
-            cout << left <<setw(15) << "|Exercito"<<setw(10)<<"| Elfo"<<setw(12)<<"| Sauron  "<<"|"<<endl;
-            cout << left <<setw(15) << "|Nome"<<setw(10)<<"|"+elf_soldier->get_nome()<<setw(12)<<"|"+sauron_soldier->get_nome()<<"|"<<endl;
-            // cout << left <<setw(15) << "|Raca "<<setw(10)<<"|"+elf_soldier->get_nome()<<setw(12)<<"|"+sauron_soldier->get_nome()<<"|"<<endl;
-            cout << left <<setw(15) << "|Dano Recebido"<<"|"<<setw(9)<<(elf_live0-elf_soldier->get_saude())<<"|"<<setw(11)<<(sauron_live0-sauron_soldier->get_saude())<<"|"<<endl;
-            cout << left <<setw(15) << "|Vivo"<<setw(10)<<"|"+elf_live<<setw(12)<<"|"+sauron_live<<"|"<<endl; 
+            cout << left <<setw(15) << "|EXERCITO"<<setw(10)<<"|Elfo"<<setw(12)<<"|Sauron"<<"|"<<endl;
+            cout << left <<setw(15) << "|NOME"<<setw(10)<<"|"+elf_soldier->get_nome()<<setw(12)<<"|"+sauron_soldier->get_nome()<<"|"<<endl;
+            cout << left <<setw(15) << "|VIDA"<<"|"<<setw(9)<<elf_soldier->get_saude()<<"|"<<setw(11)<<sauron_soldier->get_saude()<<"|"<<endl;
+            cout << left <<setw(15) << "|DANO RECEBIDO"<<"|"<<setw(9)<<(elf_live0-elf_soldier->get_saude())<<"|"<<setw(11)<<(sauron_live0-sauron_soldier->get_saude())<<"|"<<endl;
+            cout << left <<setw(15) << "|VIVO"<<setw(10)<<"|"+elf_live<<setw(12)<<"|"+sauron_live<<"|"<<endl; 
             cout<<"|______________|_________|___________|"<<endl;
-            cout<<elf_soldier->get_saude()<<"\n"<<elf_live0<<endl;
         }
+
+        // void print_elf_army
 
         void run(){
             while(!GAME_OVER){
@@ -606,8 +619,27 @@ class Menu{
 };
 
 int main(){
+    char c;
     Menu game(100, 100);
     game.rodada();
+    scanf("%c",&c);
+    game.rodada();
+    scanf("%c",&c);
+    game.rodada();
+    scanf("%c",&c);
+    game.rodada();
+    scanf("%c",&c);
+    game.rodada();
+    scanf("%c",&c);
+    game.rodada();
+    scanf("%c",&c);
+    game.rodada();
+    scanf("%c",&c);
+    game.rodada();
+    scanf("%c",&c);
+    game.rodada();
+    scanf("%c",&c);
+
     // game.log();
     // do{
     //     game.run();

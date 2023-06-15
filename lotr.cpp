@@ -344,18 +344,22 @@ class ReiBruxo: public Mago{
 
 class Menu{
 
-        bool GAME_OVER;
-
+        enum class winner{
+            none,sauron,elfo
+        };
+        winner GAME_OVER;
         queue<Soldado *> sauron_army;
         queue<Soldado *> elf_army;
         queue<Soldado *> can_resurrect;
+        bool leave;
         int sauron_size;
         int elf_size;
         int hp;
         int pa;
+        int rodada_index;
 
     public:
-        Menu(int hp, int pa) : hp(hp), pa(pa){
+        Menu(int hp, int pa) :GAME_OVER(winner::none),leave(false), hp(hp), pa(pa),rodada_index(1){
             srand(time(NULL));
             instantiate();
         }
@@ -493,7 +497,6 @@ class Menu{
                             break;
                         }
                         num_emin++;
-                        cout << num_emin;
                         nome = "Eminence";
                         elf_soldier = new Eminence(hp, pa);
                         break;
@@ -525,16 +528,19 @@ class Menu{
                 sauron_army.pop();
             while (!elf_army.empty())
                 elf_army.pop();
+            while(!can_resurrect.empty())
+                can_resurrect.pop();
+            rodada_index=1;
+            GAME_OVER = winner::none;
             sauron_size = prelude_sauron();
             elf_size = prelude_elf();
             // Only one Witch King, Sauron and Eminence allowed
         }
 
         void rodada(){
-            static int index=1;
             cout<<endl<<endl<<"--------------------------------------"<<endl;
-            if(index<10) cout<<"-------------- RODADA "<<index++<<" --------------"<<endl;
-            else cout<<"-------------- RODADA "<<index++<<" -------------"<<endl;
+            if(rodada_index<10) cout<<"-------------- RODADA "<<rodada_index++<<" --------------"<<endl;
+            else cout<<"-------------- RODADA "<<rodada_index++<<" -------------"<<endl;
             cout<<"--------------------------------------"<<endl<<endl;
             for (int i = 0; i < can_resurrect.size(); i++){
                 Soldado *soldado_resurrect = can_resurrect.front();
@@ -588,6 +594,8 @@ class Menu{
                     elf_army.push(elf_battle[i]);
                 log(elf_live0,elf_battle[i],sauron_live0,sauron_battle[i]);
             }
+            if(sauron_army.empty()) GAME_OVER=winner::elfo;
+            if(elf_army.empty()) GAME_OVER=winner::sauron;
         }
         void log(float elf_live0,Soldado *elf_soldier,float sauron_live0,Soldado *sauron_soldier){
             string elf_live,sauron_live;
@@ -607,17 +615,35 @@ class Menu{
         // void print_elf_army
 
         void run(){
-            while(!GAME_OVER){
+            char c;
+            fflush(stdin);
+            while(GAME_OVER==winner::none){
                 rodada();
-                // log();
+                scanf("%c",&c);
             }
             final_results();
         }
 
         void final_results(){
-            cout << "GAME OVER! The winner is fulano!" << endl;
-            cout << "The survivors are: ..." << endl;
-
+            cout << "GAME OVER! The winner is ";
+            if(GAME_OVER==winner::sauron){
+                cout<<"Sauron army !"<<endl<<endl;;
+                cout << "The survivors are: ..." << endl;
+                while(!sauron_army.empty()){
+                    string name=(sauron_army.front())->get_nome(); sauron_army.pop();
+                    cout<<name<<endl;
+                }
+                cout<<endl;
+            }
+            else{
+                cout<<"Elf army !"<<endl<<endl;
+                cout << "The survivors are: ..." << endl;
+                while(!elf_army.empty()){
+                    string name=(elf_army.front())->get_nome(); elf_army.pop();
+                    cout<<name<<endl;
+                }
+                cout<<endl;
+            }
             end_game();
         }
 
@@ -627,9 +653,9 @@ class Menu{
             cin >> c;
             if (c != 'Y'){
                 cout << "Alright. Bye!" << endl;
+                leave=true;
             }
             else{
-                GAME_OVER = false;
                 cout << "Alright! Restarting session" << flush;
                 for (int i = 0; i < 3; i++){
                     // this_thread::sleep_for(chrono::milliseconds(300));
@@ -637,63 +663,21 @@ class Menu{
                 }
                 // this_thread::sleep_for(chrono::milliseconds(500));
                 cout << endl;
+                leave=false;
                 instantiate();
             }
         }
 
-        bool over() { return GAME_OVER; }
+        bool over() { return leave; }
 };
 
 
 
 int main(){
-    char c;
     Menu game(100, 100);
-    game.rodada();
-    scanf("%c",&c);
-    game.rodada();
-    scanf("%c",&c);
-    game.rodada();
-    scanf("%c",&c);
-    game.rodada();
-    scanf("%c",&c);
-    game.rodada();
-    scanf("%c",&c);
-    game.rodada();
-    scanf("%c",&c);
-    game.rodada();
-    scanf("%c",&c);
-    game.rodada();
-    scanf("%c",&c);
-    game.rodada();
-    scanf("%c",&c);
-    game.rodada();
-    scanf("%c",&c);
-    game.rodada();
-    scanf("%c",&c);
-    game.rodada();
-    scanf("%c",&c);
-    game.rodada();
-    scanf("%c",&c);
-    game.rodada();
-    scanf("%c",&c);
-    game.rodada();
-    scanf("%c",&c);
-    game.rodada();
-    scanf("%c",&c);
-    game.rodada();
-    scanf("%c",&c);
-    game.rodada();
-    scanf("%c",&c);
-    game.rodada();
-    scanf("%c",&c);
-    game.rodada();
-    scanf("%c",&c);
-    game.rodada();
-    scanf("%c",&c);
-
-    // game.log();
-    // do{
-    //     game.run();
-    // } while (!game.over());      
+    do{
+        game.run();
+        getchar();
+    } while (!game.over());      
+// game.log();
 }

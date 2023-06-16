@@ -38,9 +38,8 @@ class Soldado{
         
         virtual double get_poder_ataque() { return poder_ataque; }
         
-        virtual double get_saude(){ 
-            if(saude >0)return saude;
-            else return 0;
+        virtual double get_saude(){
+            return saude >= 0.01? saude : 0;
         }
         
         virtual void contra_ataque(Soldado* other){
@@ -124,8 +123,6 @@ class Elfo: public Soldado{
         double block(){
             return 0.4;
         }
-
-
 };
 
 
@@ -137,7 +134,7 @@ class Anao: public Soldado{
         Anao(const Anao& other)= delete;
         
         void ataque(Soldado* other) override {
-            if (!(rand() % 5 <= 1))
+            if (!(rand() % 3 <= 1))
                 Soldado::ataque(other);
             else
                 cout << get_nome() << " misses the attack!" << endl;
@@ -145,7 +142,7 @@ class Anao: public Soldado{
 
         void defesa(Soldado* other, double pa) override {
             cout << get_nome() << "'s sturdy skin allows him to resist some damage!" << endl;
-            Soldado::defesa(other, pa/2);
+            Soldado::defesa(other, pa/3);
         }
         bool will_dodge(){
             return !(rand()%8);
@@ -170,6 +167,8 @@ class Humano: public Soldado{
             if(!(rand()%10)){
                 Soldado::ataque(other);
                 Soldado::ataque(other);
+                if(rand()%2)
+                    Soldado::ataque(other);
             }
         }
         bool will_block(){
@@ -203,25 +202,26 @@ class Eminence: public Humano {
 
     void defesa(Soldado* other, double pa) override {
         cout << "Shadow's increased metabolism improved his cells's regeneration, recovering his health " << endl;
-        set_saude(get_saude()+pa/8);
+        this_thread::sleep_for(chrono::seconds(1));
+        set_saude(get_saude()+pa/10.);
         if(WAR_MODE){
-            set_saude(get_saude() + pa);
+            set_saude(get_saude() + 9*pa/10.0);
             return;
         } 
-        Soldado::defesa(other, pa/4);
+        Soldado::defesa(other, pa/3);
     } 
 
     void overdrive(){
         cout << "Now... " << flush; 
         cout << "\x1B[1mI am a little motivated\x1B[0m" << endl;
-        WAR_MODE = 5;
+        WAR_MODE = 3;
     }
 
 
     void ataque(Soldado* other) override{
 
 
-        if(!WAR_MODE && rand() % 10==0)
+        if(!WAR_MODE && rand() % 15==0)
             overdrive();
 
         if(WAR_MODE){
@@ -230,7 +230,7 @@ class Eminence: public Humano {
             return;
         }
 
-        if(rand()%10)
+        if(rand()%20)
             Humano::ataque(other);
         else{
             I_AM_ATOMIC(other);

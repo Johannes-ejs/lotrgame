@@ -38,9 +38,8 @@ class Soldado{
         
         virtual double get_poder_ataque() { return poder_ataque; }
         
-        virtual double get_saude(){ 
-            if(saude >0)return saude;
-            else return 0;
+        virtual double get_saude(){
+            return saude >= 0.01? saude : 0;
         }
         
         virtual void contra_ataque(Soldado* other){
@@ -94,7 +93,13 @@ class Elfo: public Soldado{
  
         Elfo(string nome, double hp, double pa): Soldado(nome, hp, pa+1) {}        
         Elfo(const Elfo& other)= delete;
-        void ataque(Soldado* other) override { Soldado::ataque(other); }        
+        void ataque(Soldado* other) override { Soldado::ataque(other); }
+        void defesa(Soldado* other, double pa) override {
+            if(rand() % 3 == 0){
+                cout << get_nome() << "'s nimbly dodges the attack!" << endl;
+            }
+            Soldado::defesa(other, pa/1.5);
+        }    
 
 };
 
@@ -107,7 +112,7 @@ class Anao: public Soldado{
         Anao(const Anao& other)= delete;
         
         void ataque(Soldado* other) override {
-            if (!(rand() % 5 <= 1))
+            if (!(rand() % 3 <= 1))
                 Soldado::ataque(other);
             else
                 cout << get_nome() << " misses the attack!" << endl;
@@ -115,7 +120,7 @@ class Anao: public Soldado{
 
         void defesa(Soldado* other, double pa) override {
             cout << get_nome() << "'s sturdy skin allows him to resist some damage!" << endl;
-            Soldado::defesa(other, pa/2);
+            Soldado::defesa(other, pa/3);
         }
 
 };
@@ -135,6 +140,8 @@ class Humano: public Soldado{
             if(!(rand()%10)){
                 Soldado::ataque(other);
                 Soldado::ataque(other);
+                if(rand()%2)
+                    Soldado::ataque(other);
             }
         }
 
@@ -184,7 +191,7 @@ class Eminence: public Humano {
         cout << "Now... " << flush; 
         this_thread::sleep_for(chrono::milliseconds(700));
         cout << "\x1B[1mI am a little motivated\x1B[0m" << endl;
-        WAR_MODE = 5;
+        WAR_MODE = 3;
     }
 
 

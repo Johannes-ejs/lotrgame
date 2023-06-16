@@ -181,7 +181,7 @@ class Eminence: public Humano {
         this_thread::sleep_for(chrono::seconds(1));
         set_saude(get_saude()+pa/8);
         if(WAR_MODE){
-            set_saude(get_saude() + pa);
+            set_saude(get_saude() + 7*pa/8.0);
             return;
         } 
         Soldado::defesa(other, pa/4);
@@ -207,7 +207,7 @@ class Eminence: public Humano {
             return;
         }
 
-        if(rand()%10)
+        if(rand()%20)
             Humano::ataque(other);
         else{
             I_AM_ATOMIC(other);

@@ -109,6 +109,8 @@ class Anao: public Soldado{
         void ataque(Soldado* other) override {
             if (!(rand() % 5 <= 1))
                 Soldado::ataque(other);
+            else
+                cout << get_nome() << " misses the attack!" << endl;
         }
 
         void defesa(Soldado* other, double pa) override {
@@ -300,8 +302,10 @@ class Mago: public Soldado{
             if(get_saude() <=0) return;
             
             int random_var = rand();
-            if (random_var % 25 == 0)
+            if (random_var % 25 == 0){
+                cout << get_nome() << "'s spell goes haywire, hurting the caster!" << endl;
                 true_damage(this, this->get_poder_ataque());
+            }
 
             else if (random_var % 10 == 0){
                 set_poder_ataque(1.5*get_poder_ataque());
@@ -688,7 +692,7 @@ class Menu{
             char c;
             cout << "Would you like to play again? (Y/N) " << endl;
             cin >> c;
-            if (c != 'Y'){
+            if (tolower(c) != 'y'){
                 cout << "Alright. Bye!" << endl;
                 leave=true;
             }

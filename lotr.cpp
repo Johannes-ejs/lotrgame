@@ -179,12 +179,12 @@ class Eminence: public Humano {
     void defesa(Soldado* other, double pa) override {
         cout << "Shadow's increased metabolism improved his cells's regeneration, recovering his health " << endl;
         this_thread::sleep_for(chrono::seconds(1));
-        set_saude(get_saude()+pa/8);
+        set_saude(get_saude()+pa/10);
         if(WAR_MODE){
-            set_saude(get_saude() + 7*pa/8.0);
+            set_saude(get_saude() + 9*pa/10.0);
             return;
         } 
-        Soldado::defesa(other, pa/4);
+        Soldado::defesa(other, pa/3);
     } 
 
     void overdrive(){

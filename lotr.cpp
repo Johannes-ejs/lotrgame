@@ -486,7 +486,7 @@ class Menu{
                     key = 1;
                     cout << endl
                          << "Choose the race of the " << j + 2 << "th member of Sauron Army: " << endl;
-                    cout << "1 - Orc\n2 - Balrog\n3 - Rei Bruxo" << endl;
+                    cout << "1 - Orc\n2 - Balrog\n3 - Witch King" << endl;
                     int option;
                     cin >> option;
                     string nome;
@@ -556,7 +556,7 @@ class Menu{
                     key = 1;
                     cout << endl
                          << "Choose the race of the " << j + 1 << "th member of Elf Army: " << endl;
-                    cout << "1 - Elfo\n2 - Anao\n3 - Humano\n4 - Eminence\n5 - Mago" << endl;
+                    cout << "1 - Elf\n2 - Dwarf\n3 - Human\n4 - Eminence in Shadows\n5 - Mage" << endl;
                     int option;
                     cin >> option;
                     string nome;
@@ -618,7 +618,7 @@ class Menu{
 
         void rodada(){
             cout<<endl<<endl<<"--------------------------------------"<<endl;
-            if(rodada_index<10) cout<<"-------------- RODADA "<<rodada_index++<<" --------------"<<endl;
+            if(rodada_index<10) cout<<"-------------- ROUND "<<rodada_index++<<" --------------"<<endl;
             else cout<<"-------------- RODADA "<<rodada_index++<<" -------------"<<endl;
             cout<<"--------------------------------------"<<endl<<endl;
             for (int i = 0; i < can_resurrect.size(); i++){
